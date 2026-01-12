@@ -10,7 +10,7 @@
   },
   "keywords": [],
   "author": "PAIshanMadusha",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "type": "module",
   "dependencies": {
     "cors": "^2.8.5",
