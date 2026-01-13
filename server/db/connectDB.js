@@ -5,7 +5,7 @@ export const connectDB = async () => {
   // MongoDB connection URI
   const MONGO_URI =
     process.env.MONGO_URI ||
-    "mongodb://localhost:27017/smart-agri-prediction-system";
+    "mongodb://127.0.0.1:27017/smart-agri-prediction-system";
 
   // Attempt to connect to MongoDB
   try {
