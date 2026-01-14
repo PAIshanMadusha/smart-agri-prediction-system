@@ -3,6 +3,8 @@ import { User } from "../models/user.model.js";
 import { generateVerificationToken } from "../utils/generateVerificationToken.js";
 import { generateVerificationTokenExpiry } from "../utils/generateVerificationTokenExpiry.js";
 import { generateJWTandSetCookie } from "../utils/generateJWTandSetCookie.js";
+import { validateEmail } from "../utils/validateEmail.js";
+import { ValidatePassword } from "../utils/validatePassword.js";
 
 // Register Controller
 export const register = async (req, res) => {
@@ -22,6 +24,22 @@ export const register = async (req, res) => {
       return res
         .status(409)
         .json({ success: false, message: "User already exists!" });
+    }
+
+    // Validate email format
+    if (!validateEmail(email)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid email format!" });
+    }
+
+    // Validate password strength
+    if (!ValidatePassword(password)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Password must be at least 6 characters long and contain at least one letter and one number!",
+      });
     }
 
     // Hash password
