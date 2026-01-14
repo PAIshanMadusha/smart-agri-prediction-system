@@ -1,5 +1,7 @@
 import bcryptjs from "bcryptjs";
 import { User } from "../models/user.model.js";
+import { generateVerificationToken } from "../utils/generateVerificationToken.js";
+import { generateVerificationTokenExpiry } from "../utils/generateVerificationTokenExpiry.js";
 
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -20,7 +22,17 @@ export const register = async (req, res) => {
 
     const hashedPassword = await bcryptjs.hash(password, 10);
 
-    const newUser = new User({ name, email, password: hashedPassword });
+    const verificationToken = generateVerificationToken();
+
+    const verificationTokenExpiry = generateVerificationTokenExpiry();
+
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+      verificationToken,
+      verificationTokenExpiresAt: verificationTokenExpiry,
+    });
 
     await newUser.save();
 
