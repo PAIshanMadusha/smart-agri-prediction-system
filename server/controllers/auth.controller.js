@@ -84,6 +84,50 @@ export const register = async (req, res) => {
   }
 };
 
+// Verify Email Controller
+export const verifyEmail = async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    // Find user by verification token and check if token is not expired
+    const user = await User.findOne({
+      verificationToken: token,
+      verificationTokenExpiresAt: { $gt: Date.now() },
+    });
+
+    // If no user found, token is invalid or expired
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired verification token!",
+      });
+    }
+
+    // If user is already verified
+    if (user.isVerified) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is already verified!",
+      });
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpiresAt = undefined;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Email verified successfully!",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`,
+    });
+  }
+};
+
 export const login = async (req, res) => {
   res.send("Login routes");
 };
