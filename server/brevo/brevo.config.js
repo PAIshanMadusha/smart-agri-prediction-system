@@ -1,11 +1,19 @@
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+// Change the path if your .env file is located elsewhere
+dotenv.config({ path: "../.env" });
+
 import brevo from "@getbrevo/brevo";
 
-// Initialize API client
-const apiClient = brevo.ApiClient.instance;
-apiClient.authentications["apiKey"].apiKey = process.env.BREVO_API_KEY;
+// Initialize Brevo Transactional Emails API
+const brevoClient = new brevo.TransactionalEmailsApi();
 
-// Initialize transactional email API
-const transactionalEmailApi = new brevo.TransactionalEmailsApi();
+// Configure Brevo API key
+brevoClient.setApiKey(
+  brevo.TransactionalEmailsApiApiKeys.apiKey,
+  process.env.BREVO_API_KEY
+);
 
 // Export Brevo configuration
 export const brevoConfig = {
@@ -18,7 +26,7 @@ export const brevoConfig = {
         htmlContent,
       };
 
-      return await transactionalEmailApi.sendTransacEmail(sendSmtpEmail);
+      return await brevoClient.sendTransacEmail(sendSmtpEmail);
     } catch (error) {
       console.error("Brevo email error:", error.message);
       throw new Error("Email sending failed");
@@ -29,7 +37,7 @@ export const brevoConfig = {
 // Function to get email client and sender details
 export const getEmailClient = () => {
   return {
-    client: transactionalEmailApi,
+    client: brevoClient,
     sender: {
       email: process.env.BREVO_SENDER_EMAIL,
       name: process.env.BREVO_SENDER_NAME || "No-Reply",

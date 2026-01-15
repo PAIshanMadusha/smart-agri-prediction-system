@@ -5,6 +5,7 @@ import { generateVerificationTokenExpiry } from "../utils/generateVerificationTo
 import { generateJWTandSetCookie } from "../utils/generateJWTandSetCookie.js";
 import { validateEmail } from "../utils/validateEmail.js";
 import { ValidatePassword } from "../utils/validatePassword.js";
+import { sendVerificationEmail } from "../brevo/emails.js";
 
 // Register Controller
 export const register = async (req, res) => {
@@ -61,6 +62,9 @@ export const register = async (req, res) => {
 
     // Generate JWT and set cookie
     generateJWTandSetCookie(res, newUser._id);
+
+    // Send verification email
+    await sendVerificationEmail(newUser.email, verificationToken);
 
     res.status(201).json({
       success: true,
