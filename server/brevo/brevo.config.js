@@ -1,27 +1,38 @@
 import brevo from "@getbrevo/brevo";
-import dotenv from "dotenv";
 
-dotenv.config();
+// Initialize API client
+const apiClient = brevo.ApiClient.instance;
+apiClient.authentications["apiKey"].apiKey = process.env.BREVO_API_KEY;
 
-// Initialize Brevo client
-const brevoClient = new brevo.TransactionalEmailsApi();
+// Initialize transactional email API
+const transactionalEmailApi = new brevo.TransactionalEmailsApi();
 
-// Set API key for authentication
-brevoClient.setApiKey(
-  brevo.TransactionalEmailsApiApiKeys.apiKey,
-  process.env.BREVO_API_KEY
-);
-
-// Brevo configuration for sending emails
+// Export Brevo configuration
 export const brevoConfig = {
   send: async ({ from, to, subject, htmlContent }) => {
-    const sendSmtpEmail = {
-      sender: from,
-      to: [{ email: to }],
-      subject: subject,
-      htmlContent: htmlContent,
-    };
+    try {
+      const sendSmtpEmail = {
+        sender: from,
+        to: [{ email: to }],
+        subject,
+        htmlContent,
+      };
 
-    return await brevoClient.sendTransacEmail(sendSmtpEmail);
+      return await transactionalEmailApi.sendTransacEmail(sendSmtpEmail);
+    } catch (error) {
+      console.error("Brevo email error:", error.message);
+      throw new Error("Email sending failed");
+    }
   },
+};
+
+// Function to get email client and sender details
+export const getEmailClient = () => {
+  return {
+    client: transactionalEmailApi,
+    sender: {
+      email: process.env.BREVO_SENDER_EMAIL,
+      name: process.env.BREVO_SENDER_NAME || "No-Reply",
+    },
+  };
 };
