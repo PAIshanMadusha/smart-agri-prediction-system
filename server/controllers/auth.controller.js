@@ -54,6 +54,7 @@ export const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      lastLogin: Date.now(),
       verificationToken,
       verificationTokenExpiresAt: verificationTokenExpiry,
     });
@@ -137,17 +138,94 @@ export const verifyEmail = async (req, res) => {
   }
 };
 
+// Login Controller
 export const login = async (req, res) => {
-  res.send("Login routes");
+  const { email, password } = req.body;
+
+  try {
+    // Validate input
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email and password are required!" });
+    }
+
+    // Validate email format
+    if (!validateEmail(email)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid email format!" });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email or password!",
+      });
+    }
+
+    // Check if email is verified
+    if (!user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your email before logging in!",
+      });
+    }
+
+    // Compare password
+    const isPasswordValid = await bcryptjs.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email or password!",
+      });
+    }
+
+    // Generate JWT and set cookie
+    generateJWTandSetCookie(res, user._id);
+
+    // Update last login time
+    user.lastLogin = new Date();
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "User logged in successfully!",
+      user: {
+        ...user._doc,
+        password: undefined,
+        verificationToken: undefined,
+        verificationTokenExpiresAt: undefined,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`,
+    });
+  }
 };
 
 // Logout Controller
 export const logout = async (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-  });
+  try {
+    // Clear the JWT cookie
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
 
-  res.status(200).json({ success: true, message: "Logged out successfully!" });
+    res
+      .status(200)
+      .json({ success: true, message: "Logged out successfully!" });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`,
+    });
+  }
 };
