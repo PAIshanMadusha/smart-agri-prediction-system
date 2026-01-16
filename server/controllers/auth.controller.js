@@ -141,6 +141,13 @@ export const login = async (req, res) => {
   res.send("Login routes");
 };
 
+// Logout Controller
 export const logout = async (req, res) => {
-  res.send("Logout routes");
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
+
+  res.status(200).json({ success: true, message: "Logged out successfully!" });
 };
