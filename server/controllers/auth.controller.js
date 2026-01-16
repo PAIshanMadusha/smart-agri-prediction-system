@@ -5,7 +5,7 @@ import { generateVerificationTokenExpiry } from "../utils/generateVerificationTo
 import { generateJWTandSetCookie } from "../utils/generateJWTandSetCookie.js";
 import { validateEmail } from "../utils/validateEmail.js";
 import { ValidatePassword } from "../utils/validatePassword.js";
-import { sendVerificationEmail } from "../brevo/emails.js";
+import { sendVerificationEmail, sendWelcomeEmail } from "../brevo/emails.js";
 
 // Register Controller
 export const register = async (req, res) => {
@@ -116,9 +116,18 @@ export const verifyEmail = async (req, res) => {
     user.verificationTokenExpiresAt = undefined;
     await user.save();
 
+    // Send welcome email
+    await sendWelcomeEmail(user.email, user.name);
+
     res.status(200).json({
       success: true,
       message: "Email verified successfully!",
+      user: {
+        ...user._doc,
+        password: undefined,
+        verificationToken: undefined,
+        verificationTokenExpiresAt: undefined,
+      },
     });
   } catch (error) {
     res.status(500).json({

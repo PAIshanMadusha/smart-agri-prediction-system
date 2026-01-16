@@ -1,3 +1,4 @@
+// Email template for verification email
 export const VERIFICATION_EMAIL_TEMPLATE = `
 <!DOCTYPE html>
 <html lang="en">
@@ -21,10 +22,15 @@ export const VERIFICATION_EMAIL_TEMPLATE = `
     text-align: center;
     border-radius: 5px 5px 0 0;
   ">
+    <img
+      src="https://raw.githubusercontent.com/PAIshanMadusha/crop-disease-detection-cnn-model/main/static/images/leaf_favicon.png"
+      alt="Smart Agri Logo"
+      style="max-width: 80px; margin-bottom: 3px;"
+    />
     <h1 style="color: #ffffff; margin: 0;">
-      Smart Agri Prediction System
+      Smart Agri Prediction
     </h1>
-    <p style="color: #e8f5e9; margin: 4px 0 0; font-size: 16px;">
+    <p style="color: #e8f5e9; margin: 0; font-size: 16px;">
       Email Verification
     </p>
   </div>
@@ -56,7 +62,7 @@ export const VERIFICATION_EMAIL_TEMPLATE = `
       This code will expire in <strong>15 minutes</strong> for security reasons.
       Please do not share this code with anyone.
     </p>
-    <p>
+    <p style="color: #FF0000">
       If you did not create an account, you can safely ignore this email.
     </p>
     <p style="margin-top: 20px;">
@@ -74,6 +80,93 @@ export const VERIFICATION_EMAIL_TEMPLATE = `
       This is an automated message. Please do not reply to this email.
     </p>
   </div>
+</body>
+</html>
+`;
+
+// Email template for welcome email
+export const WELCOME_EMAIL_TEMPLATE = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome to Smart Agri Prediction System</title>
+</head>
+<body style="
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #f4f6f8;
+  color: #333;
+">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 20px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="
+          background-color: #ffffff;
+          border-radius: 6px;
+          overflow: hidden;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        ">
+          <tr>
+            <td style="
+              background: linear-gradient(to right, #4CAF50, #2e7d32);
+              padding: 20px;
+              text-align: center;
+            ">
+              <img
+                src="https://raw.githubusercontent.com/PAIshanMadusha/crop-disease-detection-cnn-model/main/static/images/leaf_favicon.png"
+                alt="Smart Agri Logo"
+                style="max-width: 80px; margin-bottom: 10px;"
+              />
+              <h1 style="
+                margin: 0;
+                color: #ffffff;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 26px;
+              ">
+                Welcome, We’re Glad You’re Here
+              </h1>
+              <p style="font-size: 14px; color: #e8f5e9;">
+                Account Verified Successfully!
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 25px;">
+              <p style="font-size: 16px;">Hello {USER_NAME},</p>
+              <p style="font-size: 16px;">
+                Welcome to <strong>Smart Agri Prediction System</strong>!
+                Your account has been successfully verified, and you are now
+                ready to explore intelligent agricultural insights powered by AI.
+              </p>
+              <ul style="font-size: 15px; padding-left: 20px;">
+                <li>🌱 Crop recommendations based on soil and climate</li>
+                <li>🦠 AI-based crop disease detection</li>
+                <li>🧪 Fertilizer suggestions for better yield</li>
+              </ul>
+              <p style="margin-top: 25px;">
+                Best regards,<br />
+                Smart Agri Prediction System Team
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="
+              background-color: #f1f1f1;
+              padding: 15px;
+              text-align: center;
+              font-size: 12px;
+              color: #777;
+            ">
+              This is an automated message. Please do not reply.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
 `;
