@@ -2,6 +2,7 @@ import { getEmailClient } from "./brevo.config.js";
 import {
   VERIFICATION_EMAIL_TEMPLATE,
   WELCOME_EMAIL_TEMPLATE,
+  PASSWORD_RESET_REQUEST_TEMPLATE,
 } from "./emailTemplates.js";
 
 // Function to send verification email
@@ -42,5 +43,26 @@ export const sendWelcomeEmail = async (email, name) => {
   } catch (error) {
     console.error("Error sending welcome email:", error.message);
     throw new Error("Failed to send welcome email!");
+  }
+};
+
+export const sendPasswordResetEmail = async (email, resetUrl) => {
+  const { client, sender } = getEmailClient();
+  const recipient = [{ email }];
+
+  try {
+    const response = await client.sendTransacEmail({
+      sender,
+      to: recipient,
+      subject: "[SAPS]: Password Reset Request",
+      htmlContent: PASSWORD_RESET_REQUEST_TEMPLATE.replace(
+        "{RESET_URL}",
+        resetUrl
+      ),
+    });
+    console.log("Password reset email sent successfully!:", response);
+  } catch (error) {
+    console.error("Error sending password reset email:", error.message);
+    throw new Error("Failed to send password reset email!");
   }
 };

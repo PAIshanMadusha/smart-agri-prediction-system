@@ -5,7 +5,11 @@ import { generateVerificationTokenExpiry } from "../utils/generateVerificationTo
 import { generateJWTandSetCookie } from "../utils/generateJWTandSetCookie.js";
 import { validateEmail } from "../utils/validateEmail.js";
 import { ValidatePassword } from "../utils/validatePassword.js";
-import { sendVerificationEmail, sendWelcomeEmail } from "../brevo/emails.js";
+import {
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+  sendWelcomeEmail,
+} from "../brevo/emails.js";
 import { generateResetPasswordToken } from "../utils/generateResetPasswordToken.js";
 import { generateResetPasswordTokenExpiry } from "../utils/generateResetPasswordTokenExpiry.js";
 
@@ -144,6 +148,21 @@ export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   try {
+    // Validate input
+    if (!email) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email is required!" });
+    }
+
+    // Validate email format
+    if (!validateEmail(email)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid email format!" });
+    }
+
+    // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({
@@ -160,6 +179,17 @@ export const forgotPassword = async (req, res) => {
     user.resetPasswordExpiresAt = resetPasswordTokenExpiry;
 
     await user.save();
+
+    // Send password reset email
+    await sendPasswordResetEmail(
+      user.email,
+      `${process.env.CLIENT_URL}/reset-password?token=${resetPasswordToken}`
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset email sent successfully!",
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
