@@ -350,3 +350,33 @@ export const logout = async (req, res) => {
     });
   }
 };
+
+// Check Auth Controller
+export const checkAuth = async (req, res) => {
+  try {
+    // Find user by ID attached to request object by protectedRoute middleware
+    const user = await User.findById(req.userId);
+    // If user not found
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found!" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User is authenticated",
+      user: {
+        ...user._doc,
+        password: undefined,
+        verificationToken: undefined,
+        verificationTokenExpiresAt: undefined,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`,
+    });
+  }
+};
