@@ -144,6 +144,7 @@ export const verifyEmail = async (req, res) => {
   }
 };
 
+// Forgot Password Controller
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -192,6 +193,37 @@ export const forgotPassword = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`,
+    });
+  }
+};
+
+// Reset Password Controller
+export const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpiresAt: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired password reset token!",
+      });
+    }
+
+    const hashedPassword = await bcryptjs.hash(password, 10);
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpiresAt = undefined;
+    await user.save();
+  } catch (error) {
+    return res.status(500).json({
       success: false,
       message: `Internal server error: ${error.message}`,
     });
