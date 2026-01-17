@@ -1,5 +1,7 @@
 function App() {
-  return <h1>Smart Agri Prediction System</h1>;
+  return (
+    <h1 className="text-6xl text-green-500">Smart Agri Prediction System</h1>
+  );
 }
 
 export default App;
