@@ -6,6 +6,8 @@ import { generateJWTandSetCookie } from "../utils/generateJWTandSetCookie.js";
 import { validateEmail } from "../utils/validateEmail.js";
 import { ValidatePassword } from "../utils/validatePassword.js";
 import { sendVerificationEmail, sendWelcomeEmail } from "../brevo/emails.js";
+import { generateResetPasswordToken } from "../utils/generateResetPasswordToken.js";
+import { generateResetPasswordTokenExpiry } from "../utils/generateResetPasswordTokenExpiry.js";
 
 // Register Controller
 export const register = async (req, res) => {
@@ -130,6 +132,34 @@ export const verifyEmail = async (req, res) => {
         verificationTokenExpiresAt: undefined,
       },
     });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`,
+    });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User with this email does not exist!",
+      });
+    }
+
+    // Generate reset password token and expiry
+    const resetPasswordToken = generateResetPasswordToken();
+    const resetPasswordTokenExpiry = generateResetPasswordTokenExpiry();
+
+    user.resetPasswordToken = resetPasswordToken;
+    user.resetPasswordExpiresAt = resetPasswordTokenExpiry;
+
+    await user.save();
   } catch (error) {
     res.status(500).json({
       success: false,

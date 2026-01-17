@@ -4,12 +4,14 @@ import {
   logout,
   register,
   verifyEmail,
+  forgotPassword,
 } from "../controllers/auth.controller.js";
 
 const router = express.Router();
 
 router.post("/register", register);
 router.post("/verify-email", verifyEmail);
+router.post("/forgot-password", forgotPassword);
 router.post("/login", login);
 router.post("/logout", logout);
 
