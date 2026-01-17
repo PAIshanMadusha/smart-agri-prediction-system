@@ -171,6 +171,7 @@ export const WELCOME_EMAIL_TEMPLATE = `
 </html>
 `;
 
+// Email template for password reset request
 export const PASSWORD_RESET_REQUEST_TEMPLATE = `
 <!DOCTYPE html>
 <html lang="en">
@@ -266,6 +267,110 @@ export const PASSWORD_RESET_REQUEST_TEMPLATE = `
       </td>
     </tr>
   </table>
+</body>
+</html>
+`;
+
+// Email template for password reset success
+export const PASSWORD_RESET_SUCCESS_TEMPLATE = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Password Reset Successful</title>
+</head>
+<body style="
+  margin: 0;
+  padding: 0;
+  background-color: #f4f6f8;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #333;
+">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding: 20px 0;">
+  <tr>
+    <td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="
+        background-color: #ffffff;
+        border-radius: 6px;
+        overflow: hidden;
+      ">
+        <tr>
+          <td style="
+            background: #4CAF50;
+            background: linear-gradient(to right, #4CAF50, #45a049);
+            padding: 20px;
+            text-align: center;
+          ">
+            <img
+              src="https://raw.githubusercontent.com/PAIshanMadusha/crop-disease-detection-cnn-model/main/static/images/leaf_favicon.png"
+              alt="Smart Agri Logo"
+              style="max-width: 70px; margin-bottom: 6px;"
+            />
+            <h1 style="color: #ffffff; margin: 0; font-size: 26px;">
+              Password Reset Successful
+            </h1>
+            <p style="color: #e8f5e9; margin: 6px 0 0; font-size: 14px;">
+              Smart Agri Prediction
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 25px;">
+            <p>Hello,</p>
+            <p>
+              We’re writing to confirm that your password has been
+              <strong>successfully reset</strong>.
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <span style="
+                display: inline-block;
+                background-color: #4CAF50;
+                color: #ffffff;
+                width: 55px;
+                height: 55px;
+                line-height: 55px;
+                border-radius: 50%;
+                font-size: 28px;
+                font-weight: bold;
+              ">
+                &#10003;
+              </span>
+            </div>
+            <p style="color: #FF0000;">
+              If you did not initiate this password reset, please contact our
+              support team immediately.
+            </p>
+            <p>For security reasons, we recommend that you:</p>
+            <ul style="padding-left: 20px;">
+              <li>Use a strong, unique password</li>
+              <li>Enable two-factor authentication if available</li>
+              <li>Avoid using the same password across multiple sites</li>
+            </ul>
+            <p>
+              Thank you for helping us keep your account secure.
+            </p>
+            <p style="margin-top: 25px;">
+              Best regards,<br />
+              Smart Agri Prediction System Team
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="
+            background-color: #f1f1f1;
+            padding: 12px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+          ">
+            This is an automated message. Please do not reply to this email.
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
 </body>
 </html>
 `;

@@ -7,6 +7,7 @@ import { validateEmail } from "../utils/validateEmail.js";
 import { ValidatePassword } from "../utils/validatePassword.js";
 import {
   sendPasswordResetEmail,
+  sendPasswordResetSuccessEmail,
   sendVerificationEmail,
   sendWelcomeEmail,
 } from "../brevo/emails.js";
@@ -205,11 +206,29 @@ export const resetPassword = async (req, res) => {
     const { token } = req.params;
     const { password } = req.body;
 
+    // Validate input
+    if (!password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Password is required!" });
+    }
+
+    // Validate password strength
+    if (!ValidatePassword(password)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Password must be at least 6 characters long and contain at least one letter and one number!",
+      });
+    }
+
+    // Find user by reset password token and check if token is not expired
     const user = await User.findOne({
       resetPasswordToken: token,
       resetPasswordExpiresAt: { $gt: Date.now() },
     });
 
+    // If no user found, token is invalid or expired
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -217,11 +236,21 @@ export const resetPassword = async (req, res) => {
       });
     }
 
+    // Hash new password and update user record
     const hashedPassword = await bcryptjs.hash(password, 10);
     user.password = hashedPassword;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpiresAt = undefined;
+
     await user.save();
+
+    // Send password reset success email
+    await sendPasswordResetSuccessEmail(user.email);
+
+    return res.status(200).json({
+      success: true,
+      message: "Password has been reset successfully!",
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
