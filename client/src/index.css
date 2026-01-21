@@ -1,5 +1,28 @@
 @import "tailwindcss";
 
+:root {
+  --color-primary: #16a34a;
+  --color-secondary: #15803d;
+  --color-accent: #22c55e;
+
+  --color-bg: #f0fdf4;
+  --color-text: #073319;
+
+  --font-main: 'Poppins', system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-main);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  body {
+    margin: 0;
+  }
+}
+
 html,
 body,
 #root {
