@@ -18,13 +18,13 @@
     color: var(--color-text);
   }
 
-  body {
-    margin: 0;
+  .container {
+    @apply max-w-screen-xl mx-auto;
   }
 }
 
 html,
-body,
-#root {
-  height: 100%;
+body {
+  margin: 0;
+  padding: 0;
 }
