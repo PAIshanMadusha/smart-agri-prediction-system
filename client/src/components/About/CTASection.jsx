@@ -1,5 +1,5 @@
 import { FaArrowRightLong } from "react-icons/fa6";
-import FadeIn from "./FadeIn";
+import FadeIn from "../common/FadeIn";
 import { Link } from "react-router-dom";
 
 // This component displays a call-to-action section on the About page, encouraging users to take the next step in engaging with our platform. It features a compelling headline, a supportive subheading, and a prominent button that directs users to the registration page, all styled with a vibrant background and engaging design elements to maximize conversion.

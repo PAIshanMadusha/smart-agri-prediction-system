@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { FaLeaf, FaPlay } from "react-icons/fa";
 import { FaArrowRightLong } from "react-icons/fa6";
-import FadeIn from "./FadeIn";
+import FadeIn from "../common/FadeIn";
 
 // This component is the hero section for the About page, introducing the company and its mission with a visually appealing design.
 function AboutHero() {

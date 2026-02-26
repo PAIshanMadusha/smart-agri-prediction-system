@@ -4,7 +4,7 @@ import {
   FaEnvelope,
   FaChevronRight,
 } from "react-icons/fa";
-import FadeIn from "./FadeIn";
+import FadeIn from "../common/FadeIn";
 import { team } from "../../data/about/team";
 
 // This component displays the team members of the company, introducing our key contributors and their roles in a visually appealing way. Each team member is presented with their name, role, bio, avatar, and social media links, arranged in a responsive grid layout that highlights our team's expertise and dedication to transforming agriculture through technology.

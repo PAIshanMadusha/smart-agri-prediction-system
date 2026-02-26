@@ -1,5 +1,5 @@
-import FadeIn from "./FadeIn";
 import { values } from "../../data/about/values";
+import FadeIn from "../common/FadeIn";
 
 // This component displays the core values of the company, using a grid layout to present each value with its corresponding icon, title, and description. It emphasizes our commitment to farmer-centered design, data-driven decisions, sustainable impact, and accuracy & trust.
 function CoreValues() {

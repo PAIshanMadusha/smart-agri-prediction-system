@@ -1,5 +1,5 @@
 import { FaChevronRight } from "react-icons/fa";
-import FadeIn from "./FadeIn";
+import FadeIn from "../common/FadeIn";
 import { milestones } from "../../data/about/milestones";
 
 // This component displays a timeline of the company's milestones and achievements, providing a visual narrative of our journey from inception to the present. Each milestone includes a year, title, and description, arranged in an alternating layout for better readability and engagement.

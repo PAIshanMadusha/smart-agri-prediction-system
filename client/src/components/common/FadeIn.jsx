@@ -1,4 +1,4 @@
-import { useInView } from "../../hooks/about/useInView";
+import { useInView } from "../../hooks/useInView";
 
 // This component provides a fade-in animation effect for its children elements when they come into view. It uses the Intersection Observer API to detect when the component is visible in the viewport and applies a smooth transition to fade in the content, enhancing the user experience with subtle animations as they scroll through the page.
 export default function FadeIn({ children, delay = 0, className = "" }) {

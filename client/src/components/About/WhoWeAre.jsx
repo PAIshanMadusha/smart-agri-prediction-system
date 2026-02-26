@@ -1,5 +1,5 @@
 import { FaChevronRight, FaCheckCircle } from "react-icons/fa";
-import FadeIn from "./FadeIn";
+import FadeIn from "../common/FadeIn";
 
 // This component introduces the company and its mission with a visually appealing design, using a gradient background and clear typography to capture attention.
 function WhoWeAre() {

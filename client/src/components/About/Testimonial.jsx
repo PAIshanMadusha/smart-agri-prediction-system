@@ -1,5 +1,5 @@
 import { FaQuoteLeft } from "react-icons/fa";
-import FadeIn from "./FadeIn";
+import FadeIn from "../common/FadeIn";
 
 // This component displays a testimonial from a key team member, using a visually appealing design with a gradient background, quote styling, and an avatar to highlight the personal impact of our work. It serves to humanize our mission and connect with users on an emotional level by sharing a powerful statement about our commitment to empowering farmers through technology.
 function Testimonial() {
