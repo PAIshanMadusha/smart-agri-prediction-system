@@ -12,19 +12,19 @@ function Button({
   // Define styles for different button variants
   const variants = {
     primary:
-      "bg-green-600 text-white text-sm font-semibold px-4 py-1.5 rounded hover:bg-green-700 transition-colors duration-200",
+      "bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded hover:bg-green-700 transition-colors duration-200",
 
     primarySolid:
-      "bg-white text-green-700 text-sm font-semibold px-4 py-1.5 rounded hover:bg-green-50 transition-colors duration-200",
+      "bg-white text-green-700 text-sm font-semibold px-4 py-2 rounded hover:bg-green-50 transition-colors duration-200",
 
     outline:
-      "border border-green-600 text-green-700 text-sm font-semibold px-4 py-1.5 rounded hover:bg-green-600 hover:text-white transition-colors duration-200",
+      "border border-green-600 text-green-700 text-sm font-semibold px-4 py-2 rounded hover:bg-green-600 hover:text-white transition-colors duration-200",
 
     outlineLight:
-      "border border-white text-white text-sm font-semibold px-4 py-1.5 rounded hover:bg-white hover:text-green-700 transition-colors duration-200",
+      "border border-white text-white text-sm font-semibold px-4 py-2 rounded hover:bg-white hover:text-green-700 transition-colors duration-200",
 
     danger:
-      "bg-red-600 text-white text-sm font-semibold px-4 py-1.5 rounded hover:bg-red-700 transition-colors duration-200",
+      "bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded hover:bg-red-700 transition-colors duration-200",
   };
 
   return (
