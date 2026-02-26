@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* Define CSS variables for colors and fonts */
 :root {
   --color-primary: #16a34a;
   --color-secondary: #15803d;
@@ -11,6 +12,7 @@
   --font-main: 'Poppins', system-ui, sans-serif;
 }
 
+/* Base styles and container utility */
 @layer base {
   html {
     font-family: var(--font-main);
@@ -19,7 +21,7 @@
   }
 
   .container {
-    @apply max-w-screen-xl mx-auto;
+    @apply max-w-7xl mx-auto;
   }
 }
 

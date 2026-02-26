@@ -1,6 +1,4 @@
-{
-  /* Contact Info Item Component for the Navbar */
-}
+// A reusable component to display contact information with an icon, title, and text
 function ContactInfoItem({ icon, title, text }) {
   return (
     <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-green-50 transition duration-300">

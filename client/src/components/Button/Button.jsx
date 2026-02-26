@@ -1,3 +1,4 @@
+// A reusable Button component with multiple variants and disabled state handling
 function Button({
   children,
   type = "button",
@@ -8,15 +9,22 @@ function Button({
 }) {
   const baseStyle = "px-4 py-2 rounded-lg font-medium transition duration-300";
 
+  // Define styles for different button variants
   const variants = {
     primary:
-      "px-4 py-1 rounded-md bg-white text-green-600 hover:bg-gray-200 transition duration-300",
+      "bg-green-600 text-white text-sm font-semibold px-4 py-1.5 rounded hover:bg-green-700 transition-colors duration-200",
+
+    primarySolid:
+      "bg-white text-green-700 text-sm font-semibold px-4 py-1.5 rounded hover:bg-green-50 transition-colors duration-200",
 
     outline:
-      "px-4 py-1 rounded-md text-white border border-gray-300 hover:text-white-900 hover:border-gray-400 transition duration-300",
+      "border border-green-600 text-green-700 text-sm font-semibold px-4 py-1.5 rounded hover:bg-green-600 hover:text-white transition-colors duration-200",
+
+    outlineLight:
+      "border border-white text-white text-sm font-semibold px-4 py-1.5 rounded hover:bg-white hover:text-green-700 transition-colors duration-200",
 
     danger:
-      "px-4 py-1 rounded-md bg-red-600 text-white hover:bg-red-700 transition duration-300",
+      "bg-red-600 text-white text-sm font-semibold px-4 py-1.5 rounded hover:bg-red-700 transition-colors duration-200",
   };
 
   return (
