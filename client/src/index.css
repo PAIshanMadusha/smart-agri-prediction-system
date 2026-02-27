@@ -25,6 +25,19 @@
   }
 }
 
+/* Custom animation for fade and slide effect */
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 html,
 body {
   margin: 0;
