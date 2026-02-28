@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+// User schema definition
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -14,6 +15,34 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
+    },
+
+    role: {
+      type: String,
+      enum: ["farmer", "researcher", "learner", "visitor", "admin"],
+      default: "farmer",
+    },
+
+    phone: {
+      type: String,
+      trim: true,
+    },
+
+    location: {
+      district: String,
+      province: String,
+      latitude: Number,
+      longitude: Number,
+    },
+
+    farmSize: {
+      type: Number,
+      default: 0,
+    },
+
+    preferredCrops: {
+      type: [String],
+      default: [],
     },
 
     password: {
@@ -38,7 +67,7 @@ const userSchema = new mongoose.Schema(
     resetPasswordToken: String,
     resetPasswordExpiresAt: Date,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const User = mongoose.model("User", userSchema);
