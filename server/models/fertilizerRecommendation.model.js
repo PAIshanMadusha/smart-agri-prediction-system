@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
-// Crop Recommendation schema
-const cropRecommendationSchema = new mongoose.Schema(
+// Fertilizer Recommendation schema
+const fertilizerRecommendationSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -9,22 +9,28 @@ const cropRecommendationSchema = new mongoose.Schema(
       required: true,
     },
 
+    cropType: {
+      type: String,
+      required: true,
+    },
+
+    soilType: {
+      type: String,
+      required: true,
+    },
+
     soilData: {
       nitrogen: { type: Number, required: true },
       phosphorus: { type: Number, required: true },
       potassium: { type: Number, required: true },
-      ph: { type: Number, required: true },
-    },
-
-    weatherData: {
+      moisture: { type: Number, required: true },
       temperature: { type: Number, required: true },
       humidity: { type: Number, required: true },
-      rainfall: { type: Number, required: true },
     },
 
-    recommendedCrops: [
+    recommendedFertilizers: [
       {
-        crop: { type: String, required: true },
+        fertilizer: { type: String, required: true },
         confidence: { type: Number },
       },
     ],
@@ -32,4 +38,7 @@ const cropRecommendationSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-export default mongoose.model("CropRecommendation", cropRecommendationSchema);
+export default mongoose.model(
+  "FertilizerRecommendation",
+  fertilizerRecommendationSchema,
+);
