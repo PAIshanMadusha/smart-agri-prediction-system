@@ -12,26 +12,30 @@ import diseaseRoutes from "./routes/disease.route.js";
 // Change the path if your .env file is located elsewhere
 dotenv.config({ path: "../.env" });
 
+// Get the port from environment variables or use a default value
 const PORT = process.env.PORT || 5000;
 
+// Create an Express application
 const app = express();
 
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Middleware to parse JSON request bodies
 app.use(cookieParser()); // Middleware to parse cookies
 
+// Basic route to check if the server is running
 app.get("/", (req, res) => {
   res.send("Smart Agri Prediction System Server is running");
 });
 
-// Import Authentication routes
+// Authentication routes
 app.use("/api/auth", authRoutes);
 
-// Import AI routes for crop, fertilizer, and disease prediction
+// Crop, Fertilizer, and Disease routes
 app.use("/api/crop", cropRoutes);
 app.use("/api/fertilizer", fertilizerRoutes);
 app.use("/api/disease", diseaseRoutes);
 
+// Start the server and connect to the database
 app.listen(PORT, () => {
   connectDB();
   console.log(`Server is running on http://localhost:${PORT}`);
