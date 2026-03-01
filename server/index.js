@@ -4,6 +4,9 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./db/connectDB.js";
 import authRoutes from "./routes/auth.route.js";
+import cropRoutes from "./routes/crop.route.js";
+import fertilizerRoutes from "./routes/fertilizer.route.js";
+import diseaseRoutes from "./routes/disease.route.js";
 
 // Load environment variables from .env file
 // Change the path if your .env file is located elsewhere
@@ -21,7 +24,13 @@ app.get("/", (req, res) => {
   res.send("Smart Agri Prediction System Server is running");
 });
 
+// Import Authentication routes
 app.use("/api/auth", authRoutes);
+
+// Import AI routes for crop, fertilizer, and disease prediction
+app.use("/api/crop", cropRoutes);
+app.use("/api/fertilizer", fertilizerRoutes);
+app.use("/api/disease", diseaseRoutes);
 
 app.listen(PORT, () => {
   connectDB();
