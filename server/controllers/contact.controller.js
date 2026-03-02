@@ -32,7 +32,7 @@ export const createContactMessage = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: "Server error",
+      message: `Internal server error: ${error.message}`,
     });
   }
 };

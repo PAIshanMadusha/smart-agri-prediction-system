@@ -9,6 +9,7 @@ import fertilizerRoutes from "./routes/fertilizer.route.js";
 import diseaseRoutes from "./routes/disease.route.js";
 import weatherRoutes from "./routes/weather.route.js";
 import contactRoutes from "./routes/contact.route.js";
+import postRoutes from "./routes/post.route.js";
 
 // Load environment variables from .env file
 // Change the path if your .env file is located elsewhere
@@ -42,6 +43,9 @@ app.use("/api/weather", weatherRoutes);
 
 // Contact routes
 app.use("/api/contact", contactRoutes);
+
+// Post routes
+app.use("/api/post", postRoutes);
 
 // Start the server and connect to the database
 app.listen(PORT, () => {
