@@ -16,7 +16,16 @@ import { generateResetPasswordTokenExpiry } from "../utils/generateResetPassword
 
 // Register Controller
 export const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const {
+    name,
+    email,
+    password,
+    role,
+    phone,
+    location,
+    farmSize,
+    preferredCrops,
+  } = req.body;
 
   try {
     // Validate input
@@ -50,6 +59,12 @@ export const register = async (req, res) => {
       });
     }
 
+    // For security, only allow "farmer" role to be set during registration. Admins should be created manually in the database or through a separate admin interface.
+    let safeRole = "farmer";
+    if (role && role !== "admin") {
+      safeRole = role;
+    }
+
     // Hash password
     const hashedPassword = await bcryptjs.hash(password, 10);
 
@@ -61,6 +76,11 @@ export const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      role: safeRole,
+      phone,
+      location,
+      farmSize,
+      preferredCrops,
       lastLogin: Date.now(),
       verificationToken,
       verificationTokenExpiresAt: verificationTokenExpiry,
@@ -185,7 +205,7 @@ export const forgotPassword = async (req, res) => {
     // Send password reset email
     await sendPasswordResetEmail(
       user.email,
-      `${process.env.CLIENT_URL}/reset-password?token=${resetPasswordToken}`
+      `${process.env.CLIENT_URL}/reset-password?token=${resetPasswordToken}`,
     );
 
     res.status(200).json({

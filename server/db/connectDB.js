@@ -1,3 +1,9 @@
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+// Change the path if your .env file is located elsewhere
+dotenv.config({ path: "../.env" });
+
 import mongoose from "mongoose";
 
 // Function to connect to MongoDB
