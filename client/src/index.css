@@ -1,7 +1,45 @@
 @import "tailwindcss";
 
+/* Define CSS variables for colors and fonts */
+:root {
+  --color-primary: #16a34a;
+  --color-secondary: #15803d;
+  --color-accent: #22c55e;
+
+  --color-bg: #f0fdf4;
+  --color-text: #073319;
+
+  --font-main: 'Poppins', system-ui, sans-serif;
+}
+
+/* Base styles and container utility */
+@layer base {
+  html {
+    font-family: var(--font-main);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  .container {
+    @apply max-w-7xl mx-auto;
+  }
+}
+
+/* Custom animation for fade and slide effect */
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 html,
-body,
-#root {
-  height: 100%;
+body {
+  margin: 0;
+  padding: 0;
 }
