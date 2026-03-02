@@ -29,7 +29,7 @@ app.use(cookieParser()); // Middleware to parse cookies
 
 // Basic route to check if the server is running
 app.get("/", (req, res) => {
-  res.send("Smart Agri Prediction System Server is running");
+  res.send("Smart Agri Prediction System Server is running!");
 });
 
 // Authentication routes
@@ -38,9 +38,13 @@ app.use("/api/auth", authRoutes);
 // User routes
 app.use("/api/user", userRoutes);
 
-// Crop, Fertilizer, and Disease routes
+// Crop routes
 app.use("/api/crop", cropRoutes);
+
+// Fertilizer routes
 app.use("/api/fertilizer", fertilizerRoutes);
+
+// Disease routes
 app.use("/api/disease", diseaseRoutes);
 
 // Weather routes
