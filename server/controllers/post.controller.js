@@ -53,3 +53,42 @@ export const getPosts = async (req, res) => {
     });
   }
 };
+
+// Toggle like/unlike for a post
+export const toggleLike = async (req, res) => {
+  try {
+    // Find the post by ID
+    const post = await Post.findById(req.params.id);
+
+    // If post not found, return 404
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found!",
+      });
+    }
+
+    // Get the user ID from the request (set by protectedRoute middleware)
+    const userId = req.userId;
+
+    // Check if the user has already liked the post
+    if (post.likes.includes(userId)) {
+      post.likes = post.likes.filter((id) => id.toString() !== userId);
+    } else {
+      post.likes.push(userId);
+    }
+
+    // Save the updated post
+    await post.save();
+
+    res.json({
+      success: true,
+      likes: post.likes.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`,
+    });
+  }
+};
