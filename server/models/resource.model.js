@@ -85,7 +85,6 @@ const resourceSchema = new mongoose.Schema(
 );
 
 // Indexes for efficient querying for filtering and sorting
-resourceSchema.index({ slug: 1 });
 resourceSchema.index({ category: 1 });
 resourceSchema.index({ tags: 1 });
 resourceSchema.index({ featured: 1 });

@@ -18,6 +18,7 @@ export const getResources = async (req, res) => {
 
     res.json({
       success: true,
+      message: "Resources retrieved successfully!",
       count: resources.length,
       resources,
     });
