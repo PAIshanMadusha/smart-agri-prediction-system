@@ -92,3 +92,50 @@ export const toggleLike = async (req, res) => {
     });
   }
 };
+
+// Add a comment to a post
+export const addComment = async (req, res) => {
+  try {
+    // Get the comment text from the request body
+    const { text } = req.body;
+
+    // Validate input
+    if (!text) {
+      return res.status(400).json({
+        success: false,
+        message: "Comment text is required!",
+      });
+    }
+
+    // Find the post by ID
+    const post = await Post.findById(req.params.id);
+
+    // If post not found, return 404
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found!",
+      });
+    }
+
+    // Add the comment to the post's comments array
+    post.comments.push({
+      user: req.userId,
+      text,
+    });
+
+    // Save the updated post
+    await post.save();
+
+    res.json({
+      success: true,
+      message: "Comment added successfully!",
+      text,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`,
+    });
+  }
+};
