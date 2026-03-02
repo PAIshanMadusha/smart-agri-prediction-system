@@ -33,3 +33,23 @@ export const createPost = async (req, res) => {
     });
   }
 };
+
+// Get all posts
+export const getPosts = async (req, res) => {
+  try {
+    // Fetch all posts, populate user details, and sort by creation date
+    const posts = await Post.find()
+      .populate("user", "name email") // Populate user details (name and email)
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      posts,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`,
+    });
+  }
+};
