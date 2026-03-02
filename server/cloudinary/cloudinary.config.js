@@ -1,3 +1,9 @@
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+// Change the path if your .env file is located elsewhere
+dotenv.config({ path: "../.env" });
+
 import { v2 as cloudinary } from "cloudinary";
 
 // Configure Cloudinary with environment variables
