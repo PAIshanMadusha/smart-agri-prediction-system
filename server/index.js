@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./db/connectDB.js";
 import authRoutes from "./routes/auth.route.js";
+import userRoutes from "./routes/user.route.js";
 import cropRoutes from "./routes/crop.route.js";
 import fertilizerRoutes from "./routes/fertilizer.route.js";
 import diseaseRoutes from "./routes/disease.route.js";
@@ -32,6 +33,9 @@ app.get("/", (req, res) => {
 
 // Authentication routes
 app.use("/api/auth", authRoutes);
+
+// User routes
+app.use("/api/user", userRoutes);
 
 // Crop, Fertilizer, and Disease routes
 app.use("/api/crop", cropRoutes);
