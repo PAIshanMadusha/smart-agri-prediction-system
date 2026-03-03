@@ -5,25 +5,25 @@ import Navbar from "./components/Navbar/Navbar";
 
 // Public pages
 import HomePage from "./main/HomePage";
-import AboutUsPage from "./pages/AboutUsPage";
-import ServicesPage from "./pages/ServicesPage";
-import ResourcesPage from "./pages/ResourcesPage";
-import ContactUsPage from "./pages/ContactUsPage";
-import LoginPage /*, { ResetPasswordPage }*/ from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
+import AboutUsPage from "./pages/public/AboutUsPage";
+import ServicesPage from "./pages/public/ServicesPage";
+import ResourcesPage from "./pages/public/ResourcesPage";
+import ContactUsPage from "./pages/public/ContactUsPage";
+import LoginPage /*, { ResetPasswordPage }*/ from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
 
 // ProtectedRoute component to guard routes that require authentication
 import ProtectedRoute from "./routes/protected/ProtectedRoute";
 
 // Protected pages
-import DashboardPage from "./pages/DashboardPage";
-import AIServicesPage from "./pages/AIServicesPage";
-import CropPage from "./pages/CropPage";
-import FertilizerPage from "./pages/FertilizerPage";
-import DiseasePage from "./pages/DiseasePage";
-import CommunityPage from "./pages/CommunityPage";
-import HistoryPage from "./pages/HistoryPage";
-import ProfilePage from "./pages/ProfilePage";
+import DashboardPage from "./pages/protected/DashboardPage";
+import AIServicesPage from "./pages/protected/AIServicesPage";
+import CropPage from "./pages/protected/CropPage";
+import FertilizerPage from "./pages/protected/FertilizerPage";
+import DiseasePage from "./pages/protected/DiseasePage";
+import CommunityPage from "./pages/protected/CommunityPage";
+import HistoryPage from "./pages/protected/HistoryPage";
+import ProfilePage from "./pages/protected/ProfilePage";
 
 // NotFoundPage component
 import NotFoundPage from "./pages/NotFoundPage";
