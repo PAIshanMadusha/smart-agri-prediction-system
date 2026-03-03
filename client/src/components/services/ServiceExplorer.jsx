@@ -9,7 +9,7 @@ import { services } from "../../data/services/services";
 
 // The ServiceExplorer component provides an interactive interface for users to explore the different AI services we offer. It features a tabbed layout where users can click on each service to see detailed information, including how it works, key features, and performance metrics. This component is designed to engage users and help them understand the unique benefits of each service in a visually appealing way.
 function ServiceExplorer() {
-  const [activeTab, setActiveTab] = useState("crop");
+  const [activeTab, setActiveTab] = useState("ai-services/crop");
   const active = services.find((s) => s.id === activeTab);
   return (
     <section className="py-20 md:py-16">
@@ -135,7 +135,7 @@ function ServiceExplorer() {
               </div>
 
               <Link
-                to={`/services/${active.id}`}
+                to={`/${active.id}`}
                 className={`inline-flex items-center gap-2 bg-linear-to-r ${active.gradient} text-white font-bold px-6 py-3 rounded-xl hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200 shadow-lg text-sm`}
               >
                 Try {active.title} <FaArrowRight className="text-xs" />
