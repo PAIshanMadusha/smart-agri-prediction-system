@@ -15,26 +15,13 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Get token from localStorage
-        const token = localStorage.getItem("token");
-
-        // If no token, user is not authenticated
-        if (!token) {
-          setLoading(false);
-          return;
-        }
-
-        // Make API call to check authentication status
+        // Make a request to the server to check if the user is authenticated
         const res = await axios.get(`${BASE_URL}/api/auth/check-auth`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
         });
 
-        // If successful, set the user data
         setUser(res.data.user);
       } catch (error) {
-        localStorage.removeItem("token");
         setUser(null);
         console.error("Auth check failed:", error);
       } finally {
@@ -45,20 +32,22 @@ const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Function to handle login, storing token and user data
-  const login = (userData, token) => {
-    localStorage.setItem("token", token);
+  // Function to log in the user by setting the user state
+  const login = (userData) => {
     setUser(userData);
   };
 
-  // Function to handle logout, clearing token and user data
+  // Function to log out the user by clearing the user state and making a logout request to the server
   const logout = async () => {
     try {
-      await axios.post(`${BASE_URL}/api/auth/logout`);
+      await axios.post(
+        `${BASE_URL}/api/auth/logout`,
+        {},
+        { withCredentials: true },
+      );
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
-      localStorage.removeItem("token");
       setUser(null);
     }
   };
