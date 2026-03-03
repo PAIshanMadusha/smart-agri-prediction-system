@@ -25,6 +25,9 @@ import CommunityPage from "./pages/CommunityPage";
 import HistoryPage from "./pages/HistoryPage";
 import ProfilePage from "./pages/ProfilePage";
 
+// NotFoundPage component
+import NotFoundPage from "./pages/NotFoundPage";
+
 function App() {
   return (
     <>
@@ -105,6 +108,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* NotFoundPage */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   );
