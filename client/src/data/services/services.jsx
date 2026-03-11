@@ -19,7 +19,7 @@ import { MdOutlineAutoGraph } from "react-icons/md";
 // This file defines the services offered by the Smart Agri Prediction System, including crop recommendation, disease detection, fertilizer suggestion, weather insights, and a farmer community platform. Each service is described with its features, how it works, and its unique value proposition to help farmers make informed decisions using AI-powered tools.
 export const services = [
   {
-    id: "crop",
+    id: "ai-services/crop",
     icon: <FaSeedling />,
     emoji: "🌾",
     title: "Crop Recommendation",
@@ -50,7 +50,7 @@ export const services = [
     badge: "Most Popular",
   },
   {
-    id: "disease",
+    id: "ai-services/disease",
     icon: <FaMicroscope />,
     emoji: "🔬",
     title: "Disease Detection",
@@ -81,7 +81,7 @@ export const services = [
     badge: "AI-Powered",
   },
   {
-    id: "fertilizer",
+    id: "ai-services/fertilizer",
     icon: <FaFlask />,
     emoji: "⚗️",
     title: "Fertilizer Suggestion",
@@ -112,7 +112,7 @@ export const services = [
     badge: "Eco-Smart",
   },
   {
-    id: "weather",
+    id: "profile",
     icon: <FaCloudSun />,
     emoji: "🌤️",
     title: "Weather Insights",

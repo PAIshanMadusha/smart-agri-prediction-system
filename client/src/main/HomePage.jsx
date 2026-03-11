@@ -1,9 +1,9 @@
 // Importing necessary components for the HomePage
 import HeroSection from "../components/Home/HeroSection";
-import AboutUsPage from "../pages/AboutUsPage";
-import ServicesPage from "../pages/ServicesPage";
-import ResourcesPage from "../pages/ResourcesPage";
-import ContactUsPage from "../pages/ContactUsPage";
+import AboutUsPage from "../pages/public/AboutUsPage";
+import ServicesPage from "../pages/public/ServicesPage";
+import ResourcesPage from "../pages/public/ResourcesPage";
+import ContactUsPage from "../pages/public/ContactUsPage";
 import Footer from "../components/Footer/Footer";
 
 // HomePage component that composes the main sections of the homepage
