@@ -1,7 +1,75 @@
-import React from "react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  FaLeaf,
+  FaSearch,
+  FaBookOpen,
+  FaFlask,
+  FaCloudSun,
+  FaSeedling,
+  FaMicroscope,
+  FaArrowRight,
+  FaClock,
+  FaEye,
+  FaTag,
+  FaStar,
+  FaFire,
+} from "react-icons/fa";
+import { HiSparkles, HiArrowTrendingUp } from "react-icons/hi2";
+import {
+  MdComputer,
+  MdEco,
+  MdWaterDrop,
+  MdOutlineScience,
+} from "react-icons/md";
 
-function ResourcesPage() {
-  return <div>ResourcesPage</div>;
+/* Scroll reveal hook */
+function useInView(threshold = 0.1) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) setInView(true);
+      },
+      { threshold },
+    );
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return [ref, inView];
 }
 
-export default ResourcesPage;
+function Reveal({ children, delay = 0, direction = "up", className = "" }) {
+  const [ref, inView] = useInView();
+  const t = {
+    up: "translateY(30px)",
+    left: "translateX(-30px)",
+    right: "translateX(30px)",
+    none: "none",
+  };
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: inView ? 1 : 0,
+        transform: inView ? "none" : t[direction],
+        transition: `opacity 0.65s ease ${delay}ms, transform 0.65s ease ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SectionPill({ text, dark = false }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-2 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-widest mb-4 border
+      ${dark ? "bg-white/10 text-green-200 border-white/20" : "bg-green-100 text-green-700 border-green-200"}`}
+    >
+      <FaLeaf /> {text}
+    </span>
+  );
+}
