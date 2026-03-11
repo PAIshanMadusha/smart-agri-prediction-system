@@ -1,3 +1,4 @@
+//TODO: Split into smaller components for better maintainability (e.g. WeatherWidget, SectionCard, FieldRow, etc.)
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {

@@ -1,3 +1,4 @@
+//TODO: Split into smaller components for better maintainability (e.g. FertilizerCard, SoilTypeSelector, CropTypeSelector, NumField, etc.)
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {

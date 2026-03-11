@@ -1,3 +1,4 @@
+//TODO: Split into smaller components for better maintainability (e.g. Avatar, PostCard, CommentSection, CreatePostModal, etc.)
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {

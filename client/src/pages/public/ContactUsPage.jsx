@@ -1,3 +1,4 @@
+//TODO: Split into smaller components for better maintainability (e.g. ContactCard, FaqItem, SocialLink, etc.)
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {

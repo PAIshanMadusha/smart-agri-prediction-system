@@ -1,3 +1,4 @@
+//TODO: Split into smaller components for better maintainability (e.g. ResourceCard, SectionPill, FilterBar, etc.)
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {

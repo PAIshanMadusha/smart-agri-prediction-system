@@ -1,3 +1,4 @@
+//TODO: Split into smaller components for better maintainability (e.g. LoginForm, ForgotPasswordPanel, FeaturePill, etc.)
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {

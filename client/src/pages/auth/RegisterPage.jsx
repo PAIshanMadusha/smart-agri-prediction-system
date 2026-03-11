@@ -1,3 +1,4 @@
+//TODO: Split into smaller components for better maintainability (e.g. RegisterForm, RoleCard, PasswordStrengthMeter, etc.)
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {

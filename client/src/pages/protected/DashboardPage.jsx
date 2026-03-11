@@ -1,3 +1,4 @@
+//TODO: Split into smaller components for better maintainability (e.g. WeatherCard, StatCard, QuickAction, ActivityItem, etc.)
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {

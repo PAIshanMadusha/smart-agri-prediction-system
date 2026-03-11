@@ -1,3 +1,4 @@
+//TODO: Split into smaller components for better maintainability (e.g. HistorySection, HistoryItem, ConfidenceBar, EmptyState, etc.)
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {

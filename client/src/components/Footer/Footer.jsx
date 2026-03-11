@@ -1,3 +1,4 @@
+//TODO: Split into smaller components for better maintainability (e.g. NewsletterSignup, SocialIcons, ContactInfo, etc.)
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaMapLocationDot, FaGithub } from "react-icons/fa6";
