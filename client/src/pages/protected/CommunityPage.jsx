@@ -551,3 +551,454 @@ function PostCardWithUser({ post, currentUserId, onDelete, currentUser }) {
     </div>
   );
 }
+
+/* Community page */
+export default function CommunityPage() {
+  const { user } = useAuth();
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("newest"); // newest | popular
+
+  const currentUserId = user?._id || user?.id;
+
+  /* Fetch all posts — GET /api/post → { success, posts[] } */
+  const fetchPosts = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await api.getPosts();
+      // posts[].user is populated: { _id, name, email }
+      setPosts(data.posts || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  /* After createPost returns { success, message, post }
+     post.user is just an ObjectId string — we enrich it with current user */
+  const handleCreated = (newPost) => {
+    const enriched = {
+      ...newPost,
+      user: { _id: currentUserId, name: user?.name, email: user?.email },
+      likes: [],
+      comments: [],
+    };
+    setPosts((p) => [enriched, ...p]);
+  };
+
+  /* DELETE /api/post/:id → { success, message } */
+  const handleDelete = async (postId) => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+    try {
+      await api.deletePost(postId);
+      setPosts((p) => p.filter((post) => post._id !== postId));
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  /* Client-side filter + sort */
+  const filtered = posts
+    .filter((p) => {
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return (
+        p.title?.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q) ||
+        p.user?.name?.toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) =>
+      sort === "popular"
+        ? (b.likes?.length || 0) - (a.likes?.length || 0)
+        : new Date(b.createdAt) - new Date(a.createdAt),
+    );
+
+  /* Sidebar stats */
+  const totalLikes = posts.reduce((s, p) => s + (p.likes?.length || 0), 0);
+  const totalComments = posts.reduce(
+    (s, p) => s + (p.comments?.length || 0),
+    0,
+  );
+
+  /* Active members derived from posts */
+  const activeMembers = Object.values(
+    posts.reduce((acc, p) => {
+      const id = p.user?._id || "unknown";
+      if (!acc[id]) acc[id] = { name: p.user?.name, count: 0 };
+      acc[id].count++;
+      return acc;
+    }, {}),
+  )
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  return (
+    <div className="min-h-screen bg-[#f0fdf4] text-[#073319]">
+      {/* Hero */}
+      <section className="relative bg-gradient-to-br from-[#052e16] via-[#14532d] to-[#16a34a] text-white overflow-hidden py-14 md:py-20">
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px)`,
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-green-400/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full bg-emerald-300/10 blur-3xl pointer-events-none translate-y-1/2" />
+
+        <div className="relative container mx-auto px-4 md:px-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-green-200 text-xs font-bold px-4 py-1.5 rounded-full mb-4 backdrop-blur-sm">
+                <FaUsers className="text-sm" /> Farmer Community
+              </div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight mb-3">
+                Grow Together,
+                <br />
+                <span className="text-green-300">Learn Together</span>
+              </h1>
+              <p className="text-green-100/70 text-sm md:text-base max-w-md leading-relaxed">
+                Share experiences, ask questions, and connect with farmers and
+                researchers across Sri Lanka.
+              </p>
+            </div>
+
+            {/* Live stats */}
+            <div className="flex gap-3 flex-wrap">
+              {[
+                {
+                  icon: <FaUsers className="text-sm" />,
+                  val: posts.length,
+                  label: "Posts",
+                },
+                {
+                  icon: <FaHeart className="text-sm" />,
+                  val: totalLikes,
+                  label: "Likes",
+                },
+                {
+                  icon: <FaComment className="text-sm" />,
+                  val: totalComments,
+                  label: "Comments",
+                },
+              ].map(({ icon, val, label }) => (
+                <div
+                  key={label}
+                  className="bg-white/10 backdrop-blur-sm border border-white/20 px-5 py-3.5 rounded-2xl text-center min-w-[80px] hover:bg-white/15 transition-colors"
+                >
+                  <div className="text-green-300 flex justify-center mb-1">
+                    {icon}
+                  </div>
+                  <p className="text-xl font-extrabold text-white">{val}</p>
+                  <p className="text-[11px] text-green-200/60">{label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Sticky toolbar */}
+      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="container mx-auto px-4 md:px-6 py-3 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+          {/* Search */}
+          <div className="relative flex-1 max-w-sm">
+            <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search posts, topics, members…"
+              className="w-full pl-9 pr-9 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100 transition-all"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
+              >
+                <MdClose className="text-sm" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            {/* Sort */}
+            <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
+              {[
+                {
+                  val: "newest",
+                  icon: <FaClock className="text-[10px]" />,
+                  label: "Newest",
+                },
+                {
+                  val: "popular",
+                  icon: <FaFire className="text-[10px]" />,
+                  label: "Popular",
+                },
+              ].map(({ val, icon, label }) => (
+                <button
+                  key={val}
+                  onClick={() => setSort(val)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200
+                    ${sort === val ? "bg-white text-green-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                >
+                  {icon} {label}
+                </button>
+              ))}
+            </div>
+
+            {/* New post */}
+            <button
+              onClick={() => setShowCreate(true)}
+              className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold px-4 py-2.5 rounded-xl text-sm hover:opacity-90 hover:-translate-y-0.5 transition-all shadow-md whitespace-nowrap"
+              style={{ boxShadow: "0 4px 14px rgba(22,163,74,.3)" }}
+            >
+              <HiPlus className="text-base" />
+              <span className="hidden sm:inline">New Post</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="container mx-auto px-4 md:px-6 py-8">
+        <div className="grid lg:grid-cols-3 gap-7 items-start">
+          {/* Feed */}
+          <div className="lg:col-span-2 space-y-5">
+            {/* Result count */}
+            {!loading && !error && (
+              <p className="text-xs text-gray-400 font-semibold">
+                {search
+                  ? `${filtered.length} result${filtered.length !== 1 ? "s" : ""} for "${search}"`
+                  : `${filtered.length} post${filtered.length !== 1 ? "s" : ""}`}
+              </p>
+            )}
+
+            {/* Loading skeleton */}
+            {loading &&
+              [...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3 animate-pulse"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-200" />
+                    <div className="space-y-1.5 flex-1">
+                      <div className="h-3 bg-gray-200 rounded w-1/3" />
+                      <div className="h-2 bg-gray-100 rounded w-1/4" />
+                    </div>
+                  </div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3" />
+                  <div className="space-y-1.5">
+                    <div className="h-3 bg-gray-100 rounded" />
+                    <div className="h-3 bg-gray-100 rounded w-4/5" />
+                    <div className="h-3 bg-gray-100 rounded w-3/5" />
+                  </div>
+                  <div className="flex gap-4 pt-2 border-t border-gray-50">
+                    <div className="h-5 w-12 bg-gray-100 rounded-full" />
+                    <div className="h-5 w-12 bg-gray-100 rounded-full" />
+                  </div>
+                </div>
+              ))}
+
+            {/* Error */}
+            {!loading && error && (
+              <div className="text-center py-16">
+                <div className="w-16 h-16 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">
+                  ⚠️
+                </div>
+                <h3 className="font-extrabold text-[#073319] mb-2">
+                  Could not load posts
+                </h3>
+                <p className="text-gray-500 text-sm mb-5">{error}</p>
+                <button
+                  onClick={fetchPosts}
+                  className="inline-flex items-center gap-2 bg-green-600 text-white font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-green-700 transition-colors shadow"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+
+            {/* Empty state */}
+            {!loading && !error && filtered.length === 0 && (
+              <div className="text-center py-16">
+                <div className="w-20 h-20 bg-green-50 border border-green-100 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-5">
+                  🌱
+                </div>
+                <h3 className="font-extrabold text-[#073319] mb-2 text-lg">
+                  {search
+                    ? "No posts match your search"
+                    : "Be the first to post!"}
+                </h3>
+                <p className="text-gray-500 text-sm mb-5">
+                  {search
+                    ? `No results for "${search}". Try different keywords.`
+                    : "Start the conversation and share your farming knowledge."}
+                </p>
+                {!search && (
+                  <button
+                    onClick={() => setShowCreate(true)}
+                    className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold px-6 py-3 rounded-xl text-sm hover:opacity-90 transition-all shadow-lg"
+                    style={{ boxShadow: "0 4px 16px rgba(22,163,74,.3)" }}
+                  >
+                    <HiPlus className="text-base" /> Create First Post
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Posts */}
+            {!loading &&
+              !error &&
+              filtered.map((post) => (
+                <PostCardWithUser
+                  key={post._id}
+                  post={post}
+                  currentUserId={currentUserId}
+                  currentUser={user}
+                  onDelete={handleDelete}
+                />
+              ))}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-5 lg:sticky lg:top-[68px]">
+            {/* User card */}
+            <div
+              className="bg-gradient-to-br from-[#052e16] to-[#16a34a] text-white rounded-2xl p-5 shadow-lg overflow-hidden relative"
+              style={{ boxShadow: "0 8px 32px rgba(22,163,74,.22)" }}
+            >
+              <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/5" />
+              <div className="relative flex items-center gap-3 mb-4">
+                <Avatar name={user?.name} size="lg" />
+                <div>
+                  <p className="font-extrabold text-white text-sm">
+                    {user?.name}
+                  </p>
+                  <p className="text-green-200/70 text-xs capitalize">
+                    {user?.role || "member"}
+                  </p>
+                  <p className="text-green-200/50 text-[10px]">{user?.email}</p>
+                </div>
+              </div>
+              <p className="text-green-100/65 text-xs leading-relaxed mb-4">
+                Share your farming knowledge, ask questions, and connect with
+                the Sri Lankan agricultural community.
+              </p>
+              <button
+                onClick={() => setShowCreate(true)}
+                className="w-full flex items-center justify-center gap-2 bg-white text-green-700 font-bold py-2.5 rounded-xl text-sm hover:bg-green-50 transition-colors shadow"
+              >
+                <HiPlus /> Create New Post
+              </button>
+            </div>
+
+            {/* Guidelines */}
+            <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+              <h4 className="font-extrabold text-[#073319] text-sm mb-4 flex items-center gap-2">
+                <HiSparkles className="text-green-500" /> Community Guidelines
+              </h4>
+              <ul className="space-y-2.5">
+                {[
+                  "Share real farming experiences",
+                  "Be respectful and constructive",
+                  "Ask questions freely — no question is too basic",
+                  "Add images to support your posts",
+                  "Use clear, descriptive titles",
+                ].map((g, i) => (
+                  <li
+                    key={g}
+                    className="flex items-start gap-2.5 text-xs text-gray-600"
+                  >
+                    <span className="w-4 h-4 rounded-full bg-green-100 text-green-600 text-[9px] font-extrabold flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {i + 1}
+                    </span>
+                    {g}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Active members */}
+            {activeMembers.length > 0 && (
+              <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+                <h4 className="font-extrabold text-[#073319] text-sm mb-4 flex items-center gap-2">
+                  <FaFire className="text-orange-500" /> Active Members
+                </h4>
+                <div className="space-y-3">
+                  {activeMembers.map(({ name, count }, i) => (
+                    <div key={name + i} className="flex items-center gap-3">
+                      <Avatar name={name} size="sm" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-[#073319] truncate">
+                          {name}
+                        </p>
+                        <p className="text-[10px] text-gray-400">
+                          {count} post{count !== 1 ? "s" : ""}
+                        </p>
+                      </div>
+                      <span className="text-sm">
+                        {["🥇", "🥈", "🥉"][i] || ""}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quick links */}
+            <div className="bg-green-50 border border-green-100 rounded-2xl p-5">
+              <h4 className="font-extrabold text-[#073319] text-sm mb-3 flex items-center gap-2">
+                <FaLeaf className="text-green-500" /> Quick Links
+              </h4>
+              <div className="space-y-1.5">
+                {[
+                  { label: "AI Services", to: "/ai-service" },
+                  { label: "Resource Library", to: "/resources" },
+                  { label: "Contact Support", to: "/contact" },
+                ].map(({ label, to }) => (
+                  <Link
+                    key={label}
+                    to={to}
+                    className="flex items-center justify-between text-xs font-semibold text-green-700 hover:text-green-900 transition-colors py-1.5 border-b border-green-100/60 last:border-0"
+                  >
+                    {label}
+                    <span className="text-green-400">→</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Create Post Modal */}
+      {showCreate && (
+        <CreatePostModal
+          user={user}
+          onClose={() => setShowCreate(false)}
+          onCreated={handleCreated}
+        />
+      )}
+
+      <style>{`
+        @keyframes fadeIn    { from{opacity:0}                             to{opacity:1}              }
+        @keyframes bkgIn     { from{opacity:0}                             to{opacity:1}              }
+        @keyframes slideUp   { from{opacity:0;transform:translateY(20px)}  to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeSlide { from{opacity:0;transform:translateY(10px)}  to{opacity:1;transform:translateY(0)} }
+        @keyframes shake     { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 40%{transform:translateX(5px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
+      `}</style>
+    </div>
+  );
+}
