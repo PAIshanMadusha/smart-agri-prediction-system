@@ -790,3 +790,80 @@ export function DiseaseHistory({ limit }) {
     </Section>
   );
 }
+
+/* History page */
+export default function HistoryPage() {
+  const [tab, setTab] = useState("crop");
+
+  const TABS = [
+    { key: "crop", label: "Crop", emoji: "🌾", Component: CropHistory },
+    {
+      key: "fertilizer",
+      label: "Fertilizer",
+      emoji: "🧪",
+      Component: FertilizerHistory,
+    },
+    {
+      key: "disease",
+      label: "Disease",
+      emoji: "🔬",
+      Component: DiseaseHistory,
+    },
+  ];
+
+  const Active = TABS.find((t) => t.key === tab)?.Component;
+
+  return (
+    <div className="min-h-screen bg-[#f0fdf4] text-[#073319]">
+      {/* Hero */}
+      <section className="relative bg-gradient-to-br from-[#052e16] via-[#14532d] to-[#16a34a] text-white overflow-hidden py-12 md:py-16">
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px)`,
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-green-400/10 blur-3xl pointer-events-none" />
+        <div className="relative container mx-auto px-4 md:px-6">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-green-200 text-xs font-bold px-4 py-1.5 rounded-full mb-4 backdrop-blur-sm">
+            <FaCalendarAlt /> AI Analysis History
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold mb-2">
+            Your Prediction History
+          </h1>
+          <p className="text-green-100/70 text-sm">
+            All crop, fertilizer, and disease predictions saved from your
+            analyses.
+          </p>
+        </div>
+      </section>
+
+      {/* Tab bar */}
+      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="container mx-auto px-4 md:px-6 py-2">
+          <div className="flex gap-1">
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200
+                  ${tab === t.key ? "bg-green-600 text-white shadow-md" : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"}`}
+              >
+                <span>{t.emoji}</span> {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 md:px-6 py-8">
+        {Active && <Active />}
+      </div>
+
+      <style>{`
+        @keyframes expandIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+      `}</style>
+    </div>
+  );
+}
