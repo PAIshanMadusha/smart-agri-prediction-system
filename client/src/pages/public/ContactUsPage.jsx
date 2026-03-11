@@ -67,3 +67,90 @@ function SectionPill({ text, dark = false }) {
     </span>
   );
 }
+
+/* Contact info cards data */
+const contactCards = [
+  {
+    icon: <IoIosMail />,
+    label: "Email Us",
+    primary: "support@saps.com",
+    secondary: "info@saps.com",
+    note: "We reply within 24 hours",
+    gradient: "from-emerald-500 to-green-600",
+    bg: "bg-emerald-50",
+    border: "border-emerald-100",
+    accent: "text-emerald-600",
+  },
+  {
+    icon: <FaPhone />,
+    label: "Call Us",
+    primary: "+(94)-34-567-8943",
+    secondary: "+(94)-11-234-5678",
+    note: "Mon–Fri · 8 AM – 6 PM",
+    gradient: "from-teal-500 to-emerald-600",
+    bg: "bg-teal-50",
+    border: "border-teal-100",
+    accent: "text-teal-600",
+  },
+  {
+    icon: <FaMapLocationDot />,
+    label: "Visit Us",
+    primary: "11/A Horana Road",
+    secondary: "Kalutara, Sri Lanka",
+    note: "Open for walk-ins",
+    gradient: "from-green-500 to-teal-600",
+    bg: "bg-green-50",
+    border: "border-green-100",
+    accent: "text-green-600",
+  },
+];
+
+const faqs = [
+  {
+    q: "Is Smart Agri Prediction free to use?",
+    a: "Yes — all four AI services (Crop Recommendation, Disease Detection, Fertilizer Suggestion, and Weather Insights) are completely free for registered users.",
+  },
+  {
+    q: "How accurate are the ML predictions?",
+    a: "Our models achieve up to 99.82% training accuracy. The crop recommendation model scores 99.32% on test data, and the disease CNN reaches 99.45% validation accuracy.",
+  },
+  {
+    q: "What data do I need to get a crop recommendation?",
+    a: "You'll need soil N, P, K values, pH level, plus your location's average rainfall, temperature, and humidity. The platform also auto-fills weather data via GPS.",
+  },
+  {
+    q: "Does the disease detection work with any crop?",
+    a: "Currently it supports 38 disease classes across major Sri Lankan crops. We are continuously expanding the model's crop coverage.",
+  },
+  {
+    q: "How do I report a bug or suggest a feature?",
+    a: "Use the contact form on this page, email us directly, or open an issue on our GitHub repository. We actively monitor all channels.",
+  },
+];
+
+const socialLinks = [
+  {
+    icon: <FaFacebookSquare />,
+    label: "Facebook",
+    href: "#",
+    color: "hover:text-blue-600",
+  },
+  {
+    icon: <FaInstagramSquare />,
+    label: "Instagram",
+    href: "#",
+    color: "hover:text-pink-500",
+  },
+  {
+    icon: <FaGithub />,
+    label: "GitHub",
+    href: "#",
+    color: "hover:text-gray-900",
+  },
+  {
+    icon: <FaLinkedin />,
+    label: "LinkedIn",
+    href: "#",
+    color: "hover:text-blue-700",
+  },
+];
