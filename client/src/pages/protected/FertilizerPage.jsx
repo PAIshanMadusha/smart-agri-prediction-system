@@ -1,7 +1,5 @@
 import React from "react";
 
-function FertilizerPage() {
+export default function FertilizerPage() {
   return <div>FertilizerPage</div>;
 }
-
-export default FertilizerPage;

@@ -1,15 +1,7 @@
 import React from "react";
-import HistoryPage from "./HistoryPage";
 
 function DashboardPage() {
-  return (
-    <div>
-      DashboardPage{" "}
-      <div>
-        <HistoryPage />
-      </div>
-    </div>
-  );
+  return <div>DashboardPage</div>;
 }
 
 export default DashboardPage;

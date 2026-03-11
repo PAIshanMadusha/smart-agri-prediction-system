@@ -9,15 +9,14 @@ import AboutUsPage from "./pages/public/AboutUsPage";
 import ServicesPage from "./pages/public/ServicesPage";
 import ResourcesPage from "./pages/public/ResourcesPage";
 import ContactUsPage from "./pages/public/ContactUsPage";
-import LoginPage /*, { ResetPasswordPage }*/ from "./pages/auth/LoginPage";
-import RegisterPage from "./pages/auth/RegisterPage";
+import LoginPage, { ResetPasswordPage } from "./pages/auth/LoginPage";
+import RegisterPage, { VerifyEmailPage } from "./pages/auth/RegisterPage";
 
 // ProtectedRoute component to guard routes that require authentication
 import ProtectedRoute from "./routes/protected/ProtectedRoute";
 
 // Protected pages
 import DashboardPage from "./pages/protected/DashboardPage";
-import AIServicesPage from "./pages/protected/AIServicesPage";
 import CropPage from "./pages/protected/CropPage";
 import FertilizerPage from "./pages/protected/FertilizerPage";
 import DiseasePage from "./pages/protected/DiseasePage";
@@ -40,8 +39,9 @@ function App() {
         <Route path="/resources" element={<ResourcesPage />} />
         <Route path="/contact" element={<ContactUsPage />} />
         <Route path="/login" element={<LoginPage />} />
-        {/*<Route path="/reset-password" element={<ResetPasswordPage />} />*/}
+        {<Route path="/reset-password" element={<ResetPasswordPage />} />}
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
 
         {/* Protected pages */}
         <Route
@@ -49,14 +49,6 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/ai-services"
-          element={
-            <ProtectedRoute>
-              <AIServicesPage />
             </ProtectedRoute>
           }
         />
