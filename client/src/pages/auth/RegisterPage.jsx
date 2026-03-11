@@ -455,3 +455,608 @@ export function VerifyEmailPage() {
     </div>
   );
 }
+
+/* Register page */
+function RegisterPage() {
+  const navigate = useNavigate();
+  const [step, setStep] = useState(1); // 1 = details, 2 = role select
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirm: "",
+    role: "farmer",
+  });
+  const [showPwd, setShowPwd] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => setMounted(true), 60);
+  }, []);
+
+  const strength = getStrength(form.password);
+
+  const setField = (key, value) => {
+    setForm((p) => ({ ...p, [key]: value }));
+    setFieldErrors((p) => ({ ...p, [key]: undefined }));
+    setError("");
+  };
+
+  /* Step 1 validation */
+  const validateStep1 = () => {
+    const errs = {};
+    if (!form.name.trim() || form.name.trim().length < 2)
+      errs.name = "Name must be at least 2 characters.";
+    if (!form.email || !/\S+@\S+\.\S+/.test(form.email))
+      errs.email = "Enter a valid email address.";
+    if (!form.password || form.password.length < 6)
+      errs.password = "Password must be at least 6 characters.";
+    if (!/(?=.*[a-zA-Z])(?=.*[0-9])/.test(form.password))
+      errs.password =
+        "Password must contain at least one letter and one number.";
+    if (form.password !== form.confirm)
+      errs.confirm = "Passwords do not match.";
+    return errs;
+  };
+
+  const handleNext = () => {
+    const errs = validateStep1();
+    if (Object.keys(errs).length) {
+      setFieldErrors(errs);
+      return;
+    }
+    setStep(2);
+  };
+
+  const handleSubmit = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const payload = {
+        name: form.name.trim(),
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+        role: form.role,
+      };
+      const data = await registerApi(payload);
+      // Save email for verify page to display
+      sessionStorage.setItem("saps_pending_email", form.email);
+      // If token returned immediately, save it
+      if (data.token) sessionStorage.setItem("saps_token", data.token);
+      navigate("/verify-email");
+    } catch (err) {
+      setError(err.message);
+      setStep(1); // go back to fix errors
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const inputClass = (field) =>
+    `w-full pl-10 pr-4 py-3.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 hover:border-green-300 transition-all
+     ${fieldErrors[field] ? "border-red-300 bg-red-50 focus:ring-red-300 focus:border-red-300" : "border-gray-200"}`;
+
+  return (
+    <div className="min-h-screen flex overflow-hidden bg-[#f0fdf4]">
+      {/* Left panel*/}
+      <div
+        className="hidden lg:flex lg:w-[52%] relative flex-col overflow-hidden"
+        style={{
+          background:
+            "linear-gradient(145deg, #052e16 0%, #14532d 45%, #16a34a 100%)",
+        }}
+      >
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px)`,
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-green-400/15 blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-emerald-300/10 blur-3xl" />
+        {[...Array(10)].map((_, i) => (
+          <Particle
+            key={i}
+            style={{
+              width: `${6 + (i % 4) * 5}px`,
+              height: `${6 + (i % 4) * 5}px`,
+              top: `${8 + i * 9}%`,
+              left: `${5 + i * 9}%`,
+              animation: `pulse ${3 + (i % 3)}s ease-in-out infinite`,
+              animationDelay: `${i * 0.5}s`,
+            }}
+          />
+        ))}
+
+        <div className="relative z-10 flex flex-col h-full px-12 py-12">
+          <Link to="/" className="flex items-center gap-3 group mb-auto">
+            <div className="w-12 h-12 rounded-full bg-white/15 border border-white/25 flex items-center justify-center text-2xl shadow-lg backdrop-blur-sm group-hover:bg-white/25 transition-colors duration-300">
+              🌿
+            </div>
+            <div>
+              <p className="text-xl font-extrabold text-white leading-tight">
+                Smart Agri
+              </p>
+              <p className="text-xs text-green-300 font-semibold tracking-wide">
+                Prediction Platform
+              </p>
+            </div>
+          </Link>
+
+          <div className="my-auto">
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-green-200 text-xs font-bold px-4 py-1.5 rounded-full mb-6 backdrop-blur-sm">
+              <HiSparkles className="text-green-300" /> Free Forever
+            </div>
+            <h1 className="text-4xl xl:text-5xl font-extrabold text-white leading-[1.15] mb-5">
+              Join Thousands of
+              <br />
+              <span className="text-green-300">Smart Farmers</span>
+            </h1>
+            <p className="text-green-100/65 text-base leading-relaxed mb-8 max-w-sm">
+              Create your free account and get instant access to all four
+              AI-powered agricultural tools.
+            </p>
+
+            {/* Service highlights */}
+            <div className="space-y-3">
+              {[
+                {
+                  icon: <FaSeedling />,
+                  text: "Crop Recommendation — 99.32% accuracy",
+                  color: "text-emerald-400",
+                },
+                {
+                  icon: <FaMicroscope />,
+                  text: "Disease Detection — 99.45% val accuracy",
+                  color: "text-teal-400",
+                },
+                {
+                  icon: <FaFlask />,
+                  text: "Fertilizer Suggestion — XGBoost model",
+                  color: "text-green-400",
+                },
+                {
+                  icon: <FaCloudSun />,
+                  text: "Weather Insights — Real-time OpenWeather",
+                  color: "text-sky-400",
+                },
+              ].map(({ icon, text, color }) => (
+                <div key={text} className="flex items-center gap-3">
+                  <span className={`text-lg ${color}`}>{icon}</span>
+                  <span className="text-sm text-green-100/70">{text}</span>
+                  <div className="flex-1 h-px bg-white/10" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                </div>
+              ))}
+            </div>
+
+            {/* Step progress indicator */}
+            <div className="mt-10 flex items-center gap-3">
+              {[1, 2].map((s) => (
+                <div key={s} className="flex items-center gap-2">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-extrabold transition-all duration-300
+                    ${step >= s ? "bg-green-400 text-white shadow-lg" : "bg-white/15 text-green-300/60 border border-white/20"}`}
+                  >
+                    {step > s ? <FaCheckCircle className="text-sm" /> : s}
+                  </div>
+                  <span
+                    className={`text-xs font-semibold transition-colors ${step >= s ? "text-green-200" : "text-white/30"}`}
+                  >
+                    {s === 1 ? "Your Details" : "Choose Role"}
+                  </span>
+                  {s < 2 && (
+                    <div
+                      className={`w-8 h-px ${step > s ? "bg-green-400" : "bg-white/20"}`}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-6 pt-8 border-t border-white/10">
+            {[
+              { v: "Free", l: "No credit card" },
+              { v: "4", l: "AI Tools" },
+              { v: "Secure", l: "JWT Auth" },
+            ].map(({ v, l }) => (
+              <div key={l}>
+                <p className="text-lg font-extrabold text-white">{v}</p>
+                <p className="text-xs text-green-300/60">{l}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Right panel */}
+      <div className="flex-1 flex flex-col justify-center items-center px-5 sm:px-10 py-12 overflow-y-auto">
+        {/* Mobile logo */}
+        <div className="lg:hidden mb-8">
+          <Link to="/" className="flex items-center gap-3 justify-center">
+            <div className="w-12 h-12 rounded-full bg-green-100 border border-green-200 flex items-center justify-center text-2xl shadow">
+              🌿
+            </div>
+            <div>
+              <p className="text-xl font-extrabold text-[#073319]">
+                Smart Agri
+              </p>
+              <p className="text-xs text-green-600 font-semibold">
+                Prediction Platform
+              </p>
+            </div>
+          </Link>
+        </div>
+
+        {/* Mobile step bar */}
+        <div className="lg:hidden w-full max-w-md mb-6 flex items-center gap-2">
+          {[1, 2].map((s) => (
+            <div
+              key={s}
+              className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${step >= s ? "bg-green-500" : "bg-gray-200"}`}
+            />
+          ))}
+          <span className="text-xs text-gray-400 font-semibold ml-2">
+            Step {step}/2
+          </span>
+        </div>
+
+        <div
+          className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 sm:p-10"
+          style={{
+            boxShadow:
+              "0 20px 60px rgba(22,163,74,0.10), 0 4px 20px rgba(0,0,0,0.06)",
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "none" : "translateY(24px)",
+            transition: "all 0.6s ease 0.1s",
+          }}
+        >
+          {/* Account details */}
+          {step === 1 && (
+            <div style={{ animation: "slideIn 0.35s ease" }}>
+              <div className="mb-7">
+                <span className="inline-flex items-center gap-2 bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full border border-green-200 mb-4">
+                  <FaLeaf className="text-green-500" /> Step 1 of 2
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#073319]">
+                  Create Account
+                </h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  Already have an account?{" "}
+                  <Link
+                    to="/login"
+                    className="text-green-600 font-bold hover:text-green-800 transition-colors"
+                  >
+                    Sign in
+                  </Link>
+                </p>
+              </div>
+
+              {error && (
+                <div
+                  className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-600 text-xs font-semibold px-4 py-3 rounded-xl mb-5"
+                  style={{ animation: "shake 0.4s ease" }}
+                >
+                  <span className="text-base mt-0.5">⚠</span>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {/* Full Name */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                    Full Name *
+                  </label>
+                  <div className="relative">
+                    <FaUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
+                    <input
+                      type="text"
+                      value={form.name}
+                      onChange={(e) => setField("name", e.target.value)}
+                      placeholder="Kasun Perera"
+                      autoComplete="name"
+                      className={inputClass("name")}
+                    />
+                  </div>
+                  {fieldErrors.name && (
+                    <p className="text-xs text-red-500 mt-1 font-semibold">
+                      {fieldErrors.name}
+                    </p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                    Email Address *
+                  </label>
+                  <div className="relative">
+                    <IoIosMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none" />
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={(e) => setField("email", e.target.value)}
+                      placeholder="your@email.com"
+                      autoComplete="email"
+                      className={inputClass("email")}
+                    />
+                  </div>
+                  {fieldErrors.email && (
+                    <p className="text-xs text-red-500 mt-1 font-semibold">
+                      {fieldErrors.email}
+                    </p>
+                  )}
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                    Password *
+                  </label>
+                  <div className="relative">
+                    <MdLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none" />
+                    <input
+                      type={showPwd ? "text" : "password"}
+                      value={form.password}
+                      onChange={(e) => setField("password", e.target.value)}
+                      placeholder="Min. 6 chars with letters & numbers"
+                      autoComplete="new-password"
+                      className={`${inputClass("password")} pr-12`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPwd((p) => !p)}
+                      tabIndex={-1}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-green-600 transition-colors p-1"
+                    >
+                      {showPwd ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                  {/* Strength meter */}
+                  {form.password && (
+                    <div className="mt-2">
+                      <div className="flex gap-1 mb-1">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <div
+                            key={i}
+                            className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= strength.score ? strength.color : "bg-gray-200"}`}
+                          />
+                        ))}
+                      </div>
+                      <p
+                        className={`text-[11px] font-semibold ${strength.label === "Strong" ? "text-green-600" : strength.label === "Fair" ? "text-yellow-600" : "text-red-500"}`}
+                      >
+                        {strength.label} password
+                      </p>
+                    </div>
+                  )}
+                  {fieldErrors.password && (
+                    <p className="text-xs text-red-500 mt-1 font-semibold">
+                      {fieldErrors.password}
+                    </p>
+                  )}
+                </div>
+
+                {/* Confirm Password */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                    Confirm Password *
+                  </label>
+                  <div className="relative">
+                    <MdLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none" />
+                    <input
+                      type={showConfirm ? "text" : "password"}
+                      value={form.confirm}
+                      onChange={(e) => setField("confirm", e.target.value)}
+                      placeholder="Re-enter your password"
+                      autoComplete="new-password"
+                      onKeyDown={(e) => e.key === "Enter" && handleNext()}
+                      className={`w-full pl-10 pr-12 py-3.5 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all
+                        ${
+                          form.confirm && form.password !== form.confirm
+                            ? "border-red-300 bg-red-50 focus:ring-red-300"
+                            : form.confirm && form.password === form.confirm
+                              ? "border-green-400 bg-green-50 focus:ring-green-400"
+                              : "border-gray-200 hover:border-green-300 focus:ring-green-400 focus:border-green-400"
+                        }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm((p) => !p)}
+                      tabIndex={-1}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-green-600 transition-colors p-1"
+                    >
+                      {showConfirm ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                    {form.confirm && (
+                      <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                        {form.password === form.confirm ? (
+                          <FaCheckCircle className="text-green-500 text-sm" />
+                        ) : (
+                          <span className="text-red-400 text-sm font-bold">
+                            ✕
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {fieldErrors.confirm && (
+                    <p className="text-xs text-red-500 mt-1 font-semibold">
+                      {fieldErrors.confirm}
+                    </p>
+                  )}
+                  {form.confirm &&
+                    form.password !== form.confirm &&
+                    !fieldErrors.confirm && (
+                      <p className="text-xs text-red-500 mt-1">
+                        Passwords do not match
+                      </p>
+                    )}
+                </div>
+              </div>
+
+              <button
+                onClick={handleNext}
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-4 rounded-xl text-sm mt-6 hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200 shadow-lg"
+                style={{ boxShadow: "0 6px 24px rgba(22,163,74,0.35)" }}
+              >
+                Next: Choose Your Role <MdArrowForward />
+              </button>
+
+              <p className="text-xs text-gray-400 text-center mt-4 leading-relaxed">
+                By registering you agree to our{" "}
+                <Link to="/terms" className="text-green-600 hover:underline">
+                  Terms
+                </Link>{" "}
+                and{" "}
+                <Link to="/privacy" className="text-green-600 hover:underline">
+                  Privacy Policy
+                </Link>
+              </p>
+            </div>
+          )}
+
+          {/* Role Selection */}
+          {step === 2 && (
+            <div style={{ animation: "slideIn 0.35s ease" }}>
+              <div className="mb-7">
+                <span className="inline-flex items-center gap-2 bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full border border-green-200 mb-4">
+                  <MdPeople className="text-green-500" /> Step 2 of 2
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#073319]">
+                  Choose Your Role
+                </h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  This personalises your dashboard experience. You can change it
+                  later in settings.
+                </p>
+              </div>
+
+              {error && (
+                <div
+                  className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-600 text-xs font-semibold px-4 py-3 rounded-xl mb-5"
+                  style={{ animation: "shake 0.4s ease" }}
+                >
+                  <span className="text-base mt-0.5">⚠</span>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {/* Role cards */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                {roles.map(({ value, label, desc, icon, selected, light }) => (
+                  <button
+                    key={value}
+                    onClick={() => setField("role", value)}
+                    className={`flex flex-col items-start gap-2 p-4 rounded-2xl border-2 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md
+                      ${form.role === value ? selected + " shadow-lg scale-[1.02]" : light}`}
+                  >
+                    <div
+                      className={`text-2xl ${form.role === value ? "text-white" : ""}`}
+                    >
+                      {icon}
+                    </div>
+                    <div>
+                      <p
+                        className={`text-sm font-extrabold leading-tight ${form.role === value ? "text-white" : "text-[#073319]"}`}
+                      >
+                        {label}
+                      </p>
+                      <p
+                        className={`text-[11px] leading-tight mt-0.5 ${form.role === value ? "text-white/75" : "text-gray-500"}`}
+                      >
+                        {desc}
+                      </p>
+                    </div>
+                    {form.role === value && (
+                      <div className="ml-auto -mt-1 self-end">
+                        <FaCheckCircle className="text-white text-sm opacity-90" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Selected role summary */}
+              <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 mb-6 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white text-xs font-extrabold flex items-center justify-center shadow">
+                  {form.name
+                    .split(" ")
+                    .map((w) => w[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase() || "U"}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-extrabold text-[#073319] truncate">
+                    {form.name}
+                  </p>
+                  <p className="text-[11px] text-gray-400 truncate">
+                    {form.email} ·{" "}
+                    <span className="text-green-600 font-semibold capitalize">
+                      {form.role}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setStep(1)}
+                  className="flex-1 border-2 border-gray-200 text-gray-600 font-bold py-3.5 rounded-xl text-sm hover:border-green-300 hover:text-green-700 transition-all duration-200"
+                >
+                  ← Back
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className={`flex-[2] flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-3.5 rounded-xl text-sm transition-all duration-200 shadow-lg
+                    ${loading ? "opacity-70 cursor-not-allowed" : "hover:opacity-90 hover:-translate-y-0.5 hover:shadow-xl"}`}
+                  style={
+                    !loading
+                      ? { boxShadow: "0 6px 24px rgba(22,163,74,0.35)" }
+                      : {}
+                  }
+                >
+                  {loading ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Creating Account…
+                    </>
+                  ) : (
+                    <>
+                      Create Account <MdArrowForward />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6">
+          <Link
+            to="/"
+            className="text-xs text-gray-400 hover:text-green-600 transition-colors font-medium flex items-center gap-1.5 justify-center"
+          >
+            ← Back to Home
+          </Link>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes slideIn { from { opacity:0; transform:translateX(12px); } to { opacity:1; transform:translateX(0); } }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+      `}</style>
+    </div>
+  );
+}
+
+export default RegisterPage;
