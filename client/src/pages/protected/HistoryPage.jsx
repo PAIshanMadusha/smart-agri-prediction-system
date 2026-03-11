@@ -186,3 +186,205 @@ function Section({
     </div>
   );
 }
+
+/* Crop history */
+function CropHistoryItem({ record }) {
+  const [open, setOpen] = useState(false);
+  const top = record.recommendedCrops?.[0];
+  const emoji = CROP_EMOJI[top?.crop] || "🌱";
+
+  return (
+    <div className="border-b border-gray-50 last:border-0">
+      <div
+        className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50/60 transition-colors cursor-pointer"
+        onClick={() => setOpen((p) => !p)}
+      >
+        {/* Emoji */}
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-100 to-emerald-100 border border-green-200 flex items-center justify-center text-xl flex-shrink-0">
+          {emoji}
+        </div>
+
+        {/* Main info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <p className="text-sm font-extrabold text-[#073319] truncate">
+              {top?.crop || "Unknown"}
+            </p>
+            <span className="text-[10px] font-bold bg-green-100 text-green-700 border border-green-200 px-2 py-0.5 rounded-full flex-shrink-0">
+              {top?.confidence}% match
+            </span>
+          </div>
+          <p className="text-[11px] text-gray-400">
+            N:{record.soilData?.nitrogen} · P:{record.soilData?.phosphorus} · K:
+            {record.soilData?.potassium} · pH:{record.soilData?.ph}
+          </p>
+        </div>
+
+        {/* Date + toggle */}
+        <div className="text-right flex-shrink-0">
+          <p className="text-[11px] text-gray-400 flex items-center gap-1 justify-end">
+            <FaCalendarAlt className="text-[9px]" /> {timeAgo(record.createdAt)}
+          </p>
+          <span className="text-gray-400 mt-1 block">
+            {open ? (
+              <FaChevronUp className="text-[10px] ml-auto" />
+            ) : (
+              <FaChevronDown className="text-[10px] ml-auto" />
+            )}
+          </span>
+        </div>
+      </div>
+
+      {/* Expanded */}
+      {open && (
+        <div
+          className="px-6 pb-4 bg-gray-50/40 border-t border-gray-100"
+          style={{ animation: "expandIn .2s ease" }}
+        >
+          <div className="grid sm:grid-cols-2 gap-4 mt-3">
+            {/* Input data */}
+            <div>
+              <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-2">
+                Soil & Weather Inputs
+              </p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {[
+                  ["Nitrogen", record.soilData?.nitrogen, "kg/ha"],
+                  ["Phosphorus", record.soilData?.phosphorus, "kg/ha"],
+                  ["Potassium", record.soilData?.potassium, "kg/ha"],
+                  ["pH", record.soilData?.ph, ""],
+                  ["Temperature", record.weatherData?.temperature, "°C"],
+                  ["Humidity", record.weatherData?.humidity, "%"],
+                  ["Rainfall", record.weatherData?.rainfall, "mm"],
+                ].map(([l, v, u]) => (
+                  <div
+                    key={l}
+                    className="bg-white rounded-lg px-2.5 py-1.5 border border-gray-100"
+                  >
+                    <p className="text-[9px] text-gray-400 uppercase font-bold">
+                      {l}
+                    </p>
+                    <p className="text-xs font-extrabold text-[#073319]">
+                      {v ?? "—"}
+                      {u}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* All recommendations */}
+            <div>
+              <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-2">
+                All Recommendations
+              </p>
+              <div className="space-y-2">
+                {record.recommendedCrops?.slice(0, 5).map((c, i) => (
+                  <div key={c._id}>
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className="text-xs font-bold text-[#073319] flex items-center gap-1.5">
+                        {i === 0 && "🥇"} {CROP_EMOJI[c.crop] || "🌱"} {c.crop}
+                      </span>
+                      <span className="text-[10px] text-gray-500">
+                        {c.confidence}%
+                      </span>
+                    </div>
+                    <MiniBar
+                      value={c.confidence}
+                      color={
+                        c.confidence >= 60
+                          ? "bg-green-500"
+                          : c.confidence >= 30
+                            ? "bg-yellow-500"
+                            : "bg-gray-300"
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function CropHistory({ limit }) {
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetch = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const d = await api.cropHistory();
+      setRecords(d.records || []);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  const shown = limit ? records.slice(0, limit) : records;
+
+  return (
+    <Section
+      icon="🌾"
+      title="Crop Recommendation History"
+      count={records.length}
+      color="bg-gradient-to-r from-green-50 to-emerald-50"
+      linkTo="/ai-services/crop"
+      linkLabel="New Prediction"
+      loading={loading}
+      onRefresh={fetch}
+    >
+      {loading ? (
+        <div className="p-6 space-y-3">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex gap-3 animate-pulse">
+              <div className="w-10 h-10 rounded-xl bg-gray-200 flex-shrink-0" />
+              <div className="flex-1 space-y-1.5 py-0.5">
+                <div className="h-3 bg-gray-200 rounded w-1/3" />
+                <div className="h-2.5 bg-gray-100 rounded w-2/3" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : error ? (
+        <div className="px-6 py-4 text-xs text-red-500 font-semibold">
+          ⚠ {error}
+        </div>
+      ) : shown.length === 0 ? (
+        <EmptyState
+          emoji="🌾"
+          message="No crop recommendations yet."
+          linkTo="/ai-services/crop"
+          linkLabel="Get First Recommendation"
+        />
+      ) : (
+        <>
+          {shown.map((r) => (
+            <CropHistoryItem key={r._id} record={r} />
+          ))}
+          {limit && records.length > limit && (
+            <div className="px-6 py-3 border-t border-gray-50 text-center">
+              <Link
+                to="/history"
+                className="text-xs font-bold text-green-600 hover:text-green-800 flex items-center justify-center gap-1"
+              >
+                View all {records.length} records{" "}
+                <HiArrowRight className="text-[10px]" />
+              </Link>
+            </div>
+          )}
+        </>
+      )}
+    </Section>
+  );
+}
