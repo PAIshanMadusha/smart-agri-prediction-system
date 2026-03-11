@@ -1016,3 +1016,644 @@ function ConfBar({ value, delay = 0 }) {
     </div>
   );
 }
+
+/* Disease panel */
+function DiseaseResult({ data, imagePreview }) {
+  const [expanded, setExpanded] = useState(false);
+  const { prediction, confidence, top_predictions, isLowConfidence, recordId } =
+    data;
+
+  const info = DISEASE_DATA[prediction] || null;
+  const sev = SEVERITY_CONFIG[info?.severity || "Medium"];
+  const confNum = parseFloat(confidence);
+
+  const confColor =
+    confNum >= 80
+      ? "text-green-600"
+      : confNum >= 50
+        ? "text-yellow-600"
+        : confNum >= 20
+          ? "text-orange-500"
+          : "text-red-500";
+
+  return (
+    <div className="space-y-5" style={{ animation: "fadeSlide .5s ease" }}>
+      {/* Low confidence warning */}
+      {isLowConfidence && (
+        <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-4 py-3 rounded-xl">
+          <FaExclamationTriangle className="flex-shrink-0 mt-0.5 text-amber-500" />
+          <span>
+            Low confidence result (&lt;50%). The prediction may not be accurate
+            — consider consulting an agronomist or uploading a clearer image.
+          </span>
+        </div>
+      )}
+
+      {/* Main result card */}
+      <div
+        className={`bg-gradient-to-r ${info?.color || "from-gray-500 to-gray-700"} text-white rounded-2xl overflow-hidden shadow-xl`}
+        style={{ boxShadow: "0 8px 32px rgba(0,0,0,.2)" }}
+      >
+        <div className="flex flex-col sm:flex-row">
+          {/* Uploaded image */}
+          {imagePreview && (
+            <div className="sm:w-44 h-44 flex-shrink-0 overflow-hidden">
+              <img
+                src={imagePreview}
+                alt="analysed leaf"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+          <div className="flex-1 p-5">
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <div>
+                <p className="text-xs font-bold text-white/60 uppercase tracking-widest mb-1">
+                  Detection Result
+                </p>
+                <h2 className="text-xl font-extrabold leading-tight">
+                  {info?.display || formatDiseaseName(prediction)}
+                </h2>
+                <p className="text-white/70 text-xs mt-0.5">
+                  {info?.plant} {info?.emoji}
+                </p>
+              </div>
+              <div
+                className={`flex items-center gap-1.5 text-xs font-extrabold px-3 py-1.5 rounded-full border ${sev.bg} ${sev.color} flex-shrink-0`}
+              >
+                {sev.icon} {sev.label}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 mt-3">
+              <div className="flex-1">
+                <div className="flex justify-between mb-1">
+                  <span className="text-xs text-white/60">Confidence</span>
+                  <span className={`text-sm font-extrabold ${confColor}`}>
+                    {confNum.toFixed(1)}%
+                  </span>
+                </div>
+                <ConfBar value={confNum} />
+              </div>
+            </div>
+
+            {recordId && (
+              <p className="text-white/30 text-[10px] font-mono mt-2">
+                Record ID: {recordId.slice(-12)}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Info cards */}
+      {info && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          {/* Description */}
+          <div className="px-5 py-4 border-b border-gray-50">
+            <p className="text-xs font-extrabold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <FaInfoCircle className="text-green-500" /> About This Disease
+            </p>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              {info.description}
+            </p>
+          </div>
+
+          {/* Symptoms */}
+          <div className="px-5 py-4 border-b border-gray-50">
+            <p className="text-xs font-extrabold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <MdBugReport className="text-red-500 text-base" /> Symptoms
+            </p>
+            <ul className="space-y-1.5">
+              {info.symptoms.map((s) => (
+                <li
+                  key={s}
+                  className="flex items-start gap-2.5 text-xs text-gray-600"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 flex-shrink-0" />
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Expandable treatment & prevention */}
+          <button
+            onClick={() => setExpanded((p) => !p)}
+            className="w-full flex items-center justify-between px-5 py-3 text-xs font-bold text-gray-500 hover:text-green-700 hover:bg-green-50 transition-colors"
+          >
+            Treatment & Prevention Guide
+            {expanded ? (
+              <FaChevronUp className="text-[10px]" />
+            ) : (
+              <FaChevronDown className="text-[10px]" />
+            )}
+          </button>
+          <div
+            className={`overflow-hidden transition-all duration-300 ${expanded ? "max-h-[500px]" : "max-h-0"}`}
+          >
+            <div className="px-5 pb-5 grid sm:grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-extrabold text-red-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <MdHealthAndSafety /> Treatment
+                </p>
+                <ul className="space-y-2">
+                  {info.treatment.map((t) => (
+                    <li
+                      key={t}
+                      className="flex items-start gap-2 text-xs text-gray-600"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-1.5 flex-shrink-0" />
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-xs font-extrabold text-green-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <FaShieldAlt className="text-sm" /> Prevention
+                </p>
+                <ul className="space-y-2">
+                  {info.prevention.map((p) => (
+                    <li
+                      key={p}
+                      className="flex items-start gap-2 text-xs text-gray-600"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 mt-1.5 flex-shrink-0" />
+                      {p}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top predictions */}
+      {top_predictions?.length > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <p className="text-xs font-extrabold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <FaTrophy className="text-amber-500" /> All Predictions
+          </p>
+          <div className="space-y-3">
+            {top_predictions.map((p, i) => {
+              const pInfo = DISEASE_DATA[p.disease];
+              const pConf = parseFloat(p.confidence);
+              return (
+                <div
+                  key={p._id || p.disease}
+                  className="flex items-center gap-3"
+                >
+                  <span
+                    className={`w-5 text-center text-xs font-extrabold ${i === 0 ? "text-amber-500" : "text-gray-400"}`}
+                  >
+                    {i === 0 ? "🥇" : `#${i + 1}`}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center mb-1">
+                      <p className="text-xs font-bold text-[#073319] truncate">
+                        {pInfo?.display || formatDiseaseName(p.disease)}
+                      </p>
+                      <span
+                        className={`text-xs font-extrabold ml-2 flex-shrink-0
+                        ${pConf >= 80 ? "text-green-600" : pConf >= 40 ? "text-yellow-600" : "text-gray-400"}`}
+                      >
+                        {pConf.toFixed(1)}%
+                      </span>
+                    </div>
+                    <ConfBar value={pConf} delay={i * 100} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* Main page */
+export default function DiseaseDetectionPage() {
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [apiError, setApiError] = useState("");
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef(null);
+  const resultRef = useRef(null);
+
+  const handleFile = useCallback((f) => {
+    if (!f || !f.type.startsWith("image/")) {
+      setApiError("Please upload a valid image file (JPG, PNG, WebP).");
+      return;
+    }
+    if (f.size > 10 * 1024 * 1024) {
+      setApiError("Image must be smaller than 10 MB.");
+      return;
+    }
+    setFile(f);
+    setPreview(URL.createObjectURL(f));
+    setResult(null);
+    setApiError("");
+  }, []);
+
+  const onDrop = useCallback(
+    (e) => {
+      e.preventDefault();
+      setDragOver(false);
+      const f = e.dataTransfer.files?.[0];
+      if (f) handleFile(f);
+    },
+    [handleFile],
+  );
+
+  const handleSubmit = async () => {
+    if (!file) {
+      setApiError("Please upload a leaf image first.");
+      return;
+    }
+    setLoading(true);
+    setApiError("");
+    setResult(null);
+    try {
+      // POST /api/disease/predict — field: "file" — no Content-Type header (multipart)
+      const data = await api.predict(file);
+      setResult(data);
+      setTimeout(
+        () =>
+          resultRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          }),
+        120,
+      );
+    } catch (err) {
+      setApiError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = () => {
+    setFile(null);
+    setPreview(null);
+    setResult(null);
+    setApiError("");
+  };
+
+  /* Supported plants */
+  const PLANTS = [
+    { name: "Apple", emoji: "🍎" },
+    { name: "Corn", emoji: "🌽" },
+    { name: "Grape", emoji: "🍇" },
+    { name: "Tomato", emoji: "🍅" },
+    { name: "Potato", emoji: "🥔" },
+    { name: "Peach", emoji: "🍑" },
+    { name: "Cherry", emoji: "🍒" },
+    { name: "Strawberry", emoji: "🍓" },
+    { name: "Orange", emoji: "🍊" },
+    { name: "Pepper", emoji: "🫑" },
+    { name: "Squash", emoji: "🎃" },
+    { name: "Soybean", emoji: "🫘" },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#f0fdf4] text-[#073319]">
+      {/* Hero */}
+      <section className="relative bg-gradient-to-br from-[#052e16] via-[#14532d] to-[#16a34a] text-white overflow-hidden py-14 md:py-20">
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px)`,
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-green-400/10 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 -left-16 w-72 h-72 rounded-full bg-emerald-300/10 blur-3xl pointer-events-none translate-y-1/2" />
+
+        <div className="relative container mx-auto px-4 md:px-6">
+          <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
+            <div className="max-w-xl">
+              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-green-200 text-xs font-bold px-4 py-1.5 rounded-full mb-5 backdrop-blur-sm">
+                <HiSparkles className="text-green-300" /> CNN Deep Learning ·
+                99.45% Val Accuracy
+              </div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight mb-4">
+                Crop Disease
+                <br />
+                <span className="text-green-300">Detection by Image</span>
+              </h1>
+              <p className="text-green-100/70 text-sm md:text-base leading-relaxed">
+                Upload a photo of a diseased leaf and our CNN model will
+                identify the disease with confidence scoring and treatment
+                recommendations.
+              </p>
+              <div className="flex flex-wrap gap-2.5 mt-5">
+                {[
+                  { icon: "🧠", text: "CNN Model" },
+                  { icon: "🌿", text: "38 Disease Classes" },
+                  { icon: "📸", text: "Image Upload" },
+                  { icon: "💊", text: "Treatment Guide" },
+                ].map(({ icon, text }) => (
+                  <span
+                    key={text}
+                    className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/15 text-xs font-semibold text-green-100 px-3 py-1.5 rounded-full"
+                  >
+                    {icon} {text}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Supported plants grid */}
+            <div className="hidden lg:grid grid-cols-4 gap-2 w-64">
+              {PLANTS.map(({ name, emoji }) => (
+                <div
+                  key={name}
+                  className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl p-2 text-center hover:bg-white/20 transition-colors"
+                >
+                  <span className="text-2xl block">{emoji}</span>
+                  <span className="text-[9px] font-bold text-green-200/70 mt-0.5 block">
+                    {name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Content */}
+      <div className="container mx-auto px-4 md:px-6 py-10">
+        <div className="grid lg:grid-cols-5 gap-8 items-start">
+          {/* UPLOAD PANEL */}
+          <div className="lg:col-span-2 space-y-5">
+            {/* Upload zone */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="flex items-center gap-2.5 px-6 py-4 border-b border-gray-50 bg-gradient-to-r from-teal-50 to-green-50">
+                <FaCamera className="text-teal-500" />
+                <h3 className="font-extrabold text-[#073319] text-sm">
+                  Upload Leaf Image
+                </h3>
+              </div>
+              <div className="p-5">
+                {/* Drag & Drop Zone */}
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragOver(true);
+                  }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={onDrop}
+                  onClick={() => !preview && inputRef.current?.click()}
+                  className={`relative rounded-2xl border-2 border-dashed transition-all duration-200 cursor-pointer overflow-hidden
+                    ${dragOver ? "border-green-500 bg-green-50 scale-[1.01]" : preview ? "border-green-300" : "border-gray-300 hover:border-green-400 hover:bg-green-50/50"}`}
+                  style={{ minHeight: "260px" }}
+                >
+                  {preview ? (
+                    <>
+                      <img
+                        src={preview}
+                        alt="leaf preview"
+                        className="w-full h-64 object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent flex items-end p-4">
+                        <div className="flex items-center justify-between w-full">
+                          <p className="text-white text-xs font-bold truncate max-w-[160px]">
+                            {file?.name}
+                          </p>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReset();
+                            }}
+                            className="w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center flex-shrink-0 transition-colors shadow"
+                          >
+                            <FaTimes className="text-[10px]" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="absolute top-3 left-3 bg-green-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow">
+                        ✓ Ready to Analyse
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-64 gap-3 p-6 text-center">
+                      <div className="w-16 h-16 bg-green-100 border border-green-200 rounded-2xl flex items-center justify-center text-3xl mb-1">
+                        🍃
+                      </div>
+                      <p className="text-sm font-bold text-[#073319]">
+                        {dragOver
+                          ? "Drop the image here…"
+                          : "Drag & drop a leaf image"}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        or click to browse your files
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        {["JPG", "PNG", "WebP"].map((f) => (
+                          <span
+                            key={f}
+                            className="text-[10px] font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full border border-gray-200"
+                          >
+                            {f}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="text-[10px] text-gray-400">Max 10 MB</p>
+                    </div>
+                  )}
+                  <input
+                    ref={inputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleFile(f);
+                    }}
+                  />
+                </div>
+
+                {/* Change image button */}
+                {preview && (
+                  <button
+                    onClick={() => inputRef.current?.click()}
+                    className="w-full mt-3 flex items-center justify-center gap-2 border-2 border-gray-200 text-gray-600 font-bold py-2.5 rounded-xl text-sm hover:border-green-300 hover:text-green-700 hover:bg-green-50 transition-all"
+                  >
+                    <FaImage className="text-xs" /> Change Image
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Tips */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <p className="text-xs font-extrabold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <FaInfoCircle className="text-teal-500" /> Tips for Best Results
+              </p>
+              <ul className="space-y-2.5">
+                {[
+                  "Take a close-up photo of the affected leaf",
+                  "Use good natural lighting — avoid dark or blurry images",
+                  "Capture a single leaf clearly filling the frame",
+                  "Include both upper and underside symptoms if visible",
+                  "Early-stage symptoms give better accuracy than very advanced disease",
+                ].map((t, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2.5 text-xs text-gray-600"
+                  >
+                    <span className="w-4 h-4 rounded-full bg-teal-100 text-teal-600 text-[9px] font-extrabold flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {i + 1}
+                    </span>
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Error */}
+            {apiError && (
+              <div
+                className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-600 text-xs font-semibold px-4 py-3 rounded-xl"
+                style={{ animation: "shake .4s ease" }}
+              >
+                ⚠ {apiError}
+              </div>
+            )}
+
+            {/* Submit button */}
+            <button
+              onClick={handleSubmit}
+              disabled={loading || !file}
+              className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-4 rounded-xl text-sm transition-all shadow-lg
+                ${loading || !file ? "opacity-60 cursor-not-allowed" : "hover:opacity-90 hover:-translate-y-0.5 hover:shadow-xl"}`}
+              style={
+                !loading && file
+                  ? { boxShadow: "0 6px 24px rgba(22,163,74,.35)" }
+                  : {}
+              }
+            >
+              {loading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{" "}
+                  Analysing Image…
+                </>
+              ) : (
+                <>
+                  <MdBugReport className="text-base" /> Detect Disease
+                </>
+              )}
+            </button>
+
+            <p className="text-xs text-gray-400 text-center flex items-center gap-1.5 justify-center">
+              <FaInfoCircle className="text-[10px]" /> Results are saved to your
+              detection history
+            </p>
+          </div>
+
+          {/* Result */}
+          <div className="lg:col-span-3" ref={resultRef}>
+            {/* Idle */}
+            {!result && !loading && (
+              <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-10 text-center min-h-[480px] flex flex-col items-center justify-center">
+                <div className="w-24 h-24 bg-gradient-to-br from-teal-100 to-green-100 border border-teal-200 rounded-3xl flex items-center justify-center text-5xl mx-auto mb-5">
+                  🔬
+                </div>
+                <h3 className="font-extrabold text-[#073319] text-xl mb-2">
+                  Awaiting Leaf Image
+                </h3>
+                <p className="text-gray-500 text-sm leading-relaxed max-w-xs mb-8">
+                  Upload a clear photo of a diseased leaf. Our CNN model will
+                  identify the disease, show confidence scores, and provide
+                  treatment guidance.
+                </p>
+
+                {/* Supported plants showcase */}
+                <div className="w-full max-w-sm">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+                    Supported Plants
+                  </p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {PLANTS.map(({ name, emoji }) => (
+                      <div
+                        key={name}
+                        className="bg-green-50 border border-green-100 rounded-xl p-2 text-center"
+                      >
+                        <span className="text-xl block">{emoji}</span>
+                        <span className="text-[9px] font-bold text-green-700 mt-0.5 block">
+                          {name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Loading */}
+            {loading && (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center min-h-[300px] flex flex-col items-center justify-center">
+                <div className="relative w-20 h-20 mx-auto mb-5">
+                  <div className="w-20 h-20 border-4 border-green-100 border-t-green-600 rounded-full animate-spin" />
+                  <div className="absolute inset-0 flex items-center justify-center text-2xl">
+                    🔬
+                  </div>
+                </div>
+                <h3 className="font-extrabold text-[#073319] text-lg mb-2">
+                  Analysing Leaf Image…
+                </h3>
+                <p className="text-gray-400 text-sm">
+                  Uploading to Cloudinary and running CNN model
+                </p>
+                <div className="flex gap-1.5 mt-5">
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className="w-2 h-2 bg-green-500 rounded-full animate-bounce"
+                      style={{ animationDelay: `${i * 0.15}s` }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Results */}
+            {result && !loading && (
+              <DiseaseResult data={result} imagePreview={preview} />
+            )}
+
+            {/* Reset / Try again */}
+            {result && !loading && (
+              <div className="flex flex-col sm:flex-row gap-3 mt-5">
+                <button
+                  onClick={handleReset}
+                  className="flex-1 border-2 border-green-200 text-green-700 font-bold py-3 rounded-xl text-sm hover:bg-green-50 transition-all"
+                >
+                  Analyse Another Image
+                </button>
+                <Link
+                  to="/dashboard"
+                  className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-3 rounded-xl text-sm hover:opacity-90 transition-all shadow"
+                  style={{ boxShadow: "0 4px 16px rgba(22,163,74,.3)" }}
+                >
+                  View History <HiArrowRight />
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes fadeIn    { from{opacity:0} to{opacity:1} }
+        @keyframes fadeSlide { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes shake     { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 40%{transform:translateX(5px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
+      `}</style>
+    </div>
+  );
+}
