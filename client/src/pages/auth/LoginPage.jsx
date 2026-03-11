@@ -52,3 +52,25 @@ async function resetPasswordApi({ token, password }) {
   if (!res.ok) throw new Error(data.message || "Reset failed");
   return data;
 }
+
+/* Feature pill data */
+const features = [
+  {
+    icon: <FaSeedling />,
+    text: "Crop Recommendation",
+    color: "text-emerald-400",
+  },
+  { icon: <FaMicroscope />, text: "Disease Detection", color: "text-teal-400" },
+  { icon: <FaFlask />, text: "Fertilizer Suggestion", color: "text-green-400" },
+  { icon: <FaCloudSun />, text: "Weather Insights", color: "text-sky-400" },
+];
+
+/* Floating particle */
+function Particle({ style }) {
+  return (
+    <div
+      className="absolute rounded-full bg-white/5 pointer-events-none"
+      style={style}
+    />
+  );
+}
