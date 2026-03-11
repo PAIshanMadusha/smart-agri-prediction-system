@@ -301,3 +301,253 @@ function CreatePostModal({ user, onClose, onCreated }) {
     </div>
   );
 }
+
+/* Comment section */
+function CommentSection({ postId, initialComments, user }) {
+  const [comments, setComments] = useState(initialComments);
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const listEndRef = useRef(null);
+
+  const handleSubmit = async () => {
+    const trimmed = text.trim();
+    if (!trimmed || loading) return;
+    setLoading(true);
+    try {
+      // POST /api/post/:id/comment → { success, message, text }
+      await api.addComment(postId, trimmed);
+      // Build optimistic comment — backend only returns { text }, not full populated object
+      const optimistic = {
+        _id: `local-${Date.now()}`,
+        user: { _id: user?._id, name: user?.name },
+        text: trimmed,
+        createdAt: new Date().toISOString(),
+      };
+      setComments((p) => [...p, optimistic]);
+      setText("");
+      setTimeout(
+        () => listEndRef.current?.scrollIntoView({ behavior: "smooth" }),
+        50,
+      );
+    } catch {
+      // silent
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="border-t border-gray-100 px-5 pb-4 pt-3 bg-gray-50/50">
+      {/* Comment list */}
+      {comments.length > 0 && (
+        <div
+          className="space-y-2.5 mb-3 max-h-52 overflow-y-auto pr-1"
+          style={{
+            scrollbarWidth: "thin",
+            scrollbarColor: "#bbf7d0 transparent",
+          }}
+        >
+          {comments.map((c) => (
+            <div key={c._id} className="flex gap-2.5 items-start">
+              <Avatar name={c.user?.name} size="sm" />
+              <div className="flex-1 bg-white rounded-xl border border-gray-100 px-3 py-2 shadow-sm min-w-0">
+                <p className="text-[11px] font-extrabold text-green-700 mb-0.5">
+                  {c.user?.name || "Member"}
+                </p>
+                <p className="text-xs text-gray-600 leading-relaxed break-words">
+                  {c.text}
+                </p>
+                <p className="text-[10px] text-gray-400 mt-1">
+                  {timeAgo(c.createdAt)}
+                </p>
+              </div>
+            </div>
+          ))}
+          <div ref={listEndRef} />
+        </div>
+      )}
+
+      {/* Input row */}
+      <div className="flex gap-2 items-center">
+        <Avatar name={user?.name} size="sm" />
+        <div className="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-full px-3.5 py-2 focus-within:border-green-400 focus-within:ring-2 focus-within:ring-green-100 transition-all">
+          <input
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) =>
+              e.key === "Enter" && !e.shiftKey && handleSubmit()
+            }
+            placeholder="Write a comment…"
+            maxLength={300}
+            className="flex-1 text-xs bg-transparent outline-none text-gray-700 placeholder-gray-400"
+          />
+          <button
+            onClick={handleSubmit}
+            disabled={loading || !text.trim()}
+            className={`flex-shrink-0 transition-colors ${text.trim() ? "text-green-600 hover:text-green-800" : "text-gray-300 cursor-not-allowed"}`}
+          >
+            {loading ? (
+              <span className="w-3 h-3 border border-green-400/30 border-t-green-500 rounded-full animate-spin block" />
+            ) : (
+              <FaPaperPlane className="text-xs" />
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Wrapper to pass user into PostCard cleanly
+function PostCardWithUser({ post, currentUserId, onDelete, currentUser }) {
+  const [liked, setLiked] = useState(() => post.likes?.includes(currentUserId));
+  const [likeCount, setLikeCount] = useState(post.likes?.length || 0);
+  const [likeLoading, setLikeLoading] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
+  const commentCount = post.comments?.length || 0;
+
+  const isOwner =
+    post.user?._id === currentUserId ||
+    post.user?._id?.toString() === currentUserId?.toString() ||
+    post.user === currentUserId;
+
+  useEffect(() => {
+    const fn = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target))
+        setShowMenu(false);
+    };
+    document.addEventListener("mousedown", fn);
+    return () => document.removeEventListener("mousedown", fn);
+  }, []);
+
+  const handleLike = async () => {
+    if (likeLoading) return;
+    setLikeLoading(true);
+    const prev = { liked, likeCount };
+    setLiked(!liked);
+    setLikeCount((n) => (liked ? n - 1 : n + 1));
+    try {
+      const data = await api.toggleLike(post._id);
+      // data.likes = authoritative count from your toggleLike controller
+      setLikeCount(data.likes);
+    } catch {
+      setLiked(prev.liked);
+      setLikeCount(prev.likeCount);
+    } finally {
+      setLikeLoading(false);
+    }
+  };
+
+  return (
+    <div
+      className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
+      style={{ animation: "fadeSlide .4s ease" }}
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between px-5 pt-4 pb-3">
+        <div className="flex items-center gap-3">
+          <Avatar name={post.user?.name} size="md" />
+          <div>
+            <p className="text-sm font-extrabold text-[#073319] leading-tight">
+              {post.user?.name || "Unknown"}
+            </p>
+            <p className="text-[11px] text-gray-400 flex items-center gap-1">
+              {timeAgo(post.createdAt)}
+              {post.user?.email && (
+                <span className="text-gray-300">· {post.user.email}</span>
+              )}
+            </p>
+          </div>
+        </div>
+
+        {isOwner && (
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setShowMenu((p) => !p)}
+              className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors"
+            >
+              <FaEllipsisH className="text-xs" />
+            </button>
+            {showMenu && (
+              <div
+                className="absolute right-0 top-9 bg-white border border-gray-100 rounded-xl shadow-xl z-20 overflow-hidden"
+                style={{ minWidth: "140px", animation: "fadeIn .15s ease" }}
+              >
+                <button
+                  onClick={() => {
+                    setShowMenu(false);
+                    onDelete(post._id);
+                  }}
+                  className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors font-semibold"
+                >
+                  <FaTrash className="text-xs" /> Delete Post
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="px-5 pb-3">
+        <h3 className="text-[15px] font-extrabold text-[#073319] mb-1.5 leading-snug">
+          {post.title}
+        </h3>
+        <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line line-clamp-4">
+          {post.description}
+        </p>
+      </div>
+
+      {/* Image */}
+      {post.imageUrl && (
+        <div className="mx-5 mb-3 rounded-xl overflow-hidden bg-gray-100 max-h-64">
+          <img
+            src={post.imageUrl}
+            alt={post.title}
+            className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-500"
+            onError={(e) => {
+              e.target.closest("div").style.display = "none";
+            }}
+          />
+        </div>
+      )}
+
+      {/* Action bar */}
+      <div className="flex items-center gap-5 px-5 py-3 border-t border-gray-50">
+        <button
+          onClick={handleLike}
+          className={`flex items-center gap-1.5 text-sm font-bold transition-all duration-200 group
+            ${liked ? "text-red-500" : "text-gray-400 hover:text-red-400"}`}
+        >
+          {liked ? (
+            <FaHeart className="text-base group-hover:scale-110 transition-transform" />
+          ) : (
+            <FaRegHeart className="text-base group-hover:scale-110 transition-transform" />
+          )}
+          <span>{likeCount}</span>
+        </button>
+
+        <button
+          onClick={() => setShowComments((p) => !p)}
+          className={`flex items-center gap-1.5 text-sm font-bold transition-colors duration-200
+            ${showComments ? "text-green-600" : "text-gray-400 hover:text-green-500"}`}
+        >
+          <FaComment className="text-base" />
+          <span>{commentCount}</span>
+        </button>
+      </div>
+
+      {/* Comments */}
+      {showComments && (
+        <CommentSection
+          postId={post._id}
+          initialComments={post.comments || []}
+          user={currentUser}
+        />
+      )}
+    </div>
+  );
+}
