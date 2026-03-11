@@ -712,3 +712,449 @@ function InputField({ field, value, onChange, error }) {
     </div>
   );
 }
+
+/* Main page */
+export default function CropRecommendationPage() {
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+  const [results, setResults] = useState(null);
+  const [recordId, setRecordId] = useState(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [weatherCity, setWeatherCity] = useState("");
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const resultsRef = useRef(null);
+
+  /* Prefill temperature + humidity from profile weather */
+  useEffect(() => {
+    api
+      .getProfile()
+      .then(async ({ user }) => {
+        const lat = user?.location?.latitude;
+        const lon = user?.location?.longitude;
+        if (!lat || !lon) return;
+        setWeatherLoading(true);
+        try {
+          const { weather } = await api.getWeather(lat, lon);
+          setForm((p) => ({
+            ...p,
+            temperature: weather.temperature ?? p.temperature,
+            humidity: weather.humidity ?? p.humidity,
+            rainfall: p.rainfall || "",
+          }));
+          setWeatherCity(weather.city || "");
+          setProfileLoaded(true);
+        } catch {
+          /* silent */
+        } finally {
+          setWeatherLoading(false);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const setField = (key, val) => {
+    setForm((p) => ({ ...p, [key]: val }));
+    setFieldErrors((p) => ({ ...p, [key]: undefined }));
+    setApiError("");
+  };
+
+  const validate = () => {
+    const errs = {};
+    FIELDS.forEach(({ key, label, min, max }) => {
+      const v = parseFloat(form[key]);
+      if (form[key] === "" || isNaN(v)) errs[key] = `${label} is required.`;
+      else if (v < min || v > max)
+        errs[key] = `Must be between ${min} and ${max}.`;
+    });
+    return errs;
+  };
+
+  const handleSubmit = async () => {
+    const errs = validate();
+    if (Object.keys(errs).length) {
+      setFieldErrors(errs);
+      return;
+    }
+    setLoading(true);
+    setApiError("");
+    setResults(null);
+    try {
+      const payload = Object.fromEntries(
+        Object.entries(form).map(([k, v]) => [k, parseFloat(v)]),
+      );
+      // POST /api/crop/predict
+      const data = await api.predict(payload);
+      setResults(data.recommendations);
+      setRecordId(data.recordId);
+      // Scroll to results
+      setTimeout(
+        () =>
+          resultsRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          }),
+        100,
+      );
+    } catch (err) {
+      setApiError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = () => {
+    setForm(EMPTY_FORM);
+    setResults(null);
+    setRecordId(null);
+    setApiError("");
+    setFieldErrors({});
+  };
+
+  const topResult = results?.[0];
+  const topInfo = topResult ? CROP_DATA[topResult.crop] : null;
+
+  return (
+    <div className="min-h-screen bg-[#f0fdf4] text-[#073319]">
+      {/* Hero */}
+      <section className="relative bg-gradient-to-br from-[#052e16] via-[#14532d] to-[#16a34a] text-white overflow-hidden py-14 md:py-20">
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px)`,
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-green-400/10 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 -left-16 w-72 h-72 rounded-full bg-emerald-300/10 blur-3xl pointer-events-none translate-y-1/2" />
+
+        <div className="relative container mx-auto px-4 md:px-6">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-green-200 text-xs font-bold px-4 py-1.5 rounded-full mb-5 backdrop-blur-sm">
+              <HiSparkles className="text-green-300" /> AI-Powered · 99.32%
+              Accuracy · Random Forest
+            </div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight mb-4">
+              Crop Recommendation
+              <br />
+              <span className="text-green-300">from Your Soil Data</span>
+            </h1>
+            <p className="text-green-100/70 text-sm md:text-base leading-relaxed max-w-lg">
+              Enter your soil NPK values and environmental conditions to get
+              AI-powered crop recommendations ranked by confidence.
+            </p>
+
+            {/* Model info pills */}
+            <div className="flex flex-wrap gap-2.5 mt-6">
+              {[
+                { icon: "🌿", text: "22 Crop Types" },
+                { icon: "🤖", text: "Random Forest Model" },
+                { icon: "📊", text: "7 Input Parameters" },
+                { icon: "⚡", text: "Instant Results" },
+              ].map(({ icon, text }) => (
+                <span
+                  key={text}
+                  className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/15 text-xs font-semibold text-green-100 px-3 py-1.5 rounded-full"
+                >
+                  {icon} {text}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main content */}
+      <div className="container mx-auto px-4 md:px-6 py-10">
+        <div className="grid lg:grid-cols-5 gap-8 items-start">
+          {/* Input form (2/5) */}
+          <div className="lg:col-span-2 space-y-5">
+            {/* Weather prefill notice */}
+            {(weatherLoading || profileLoaded) && (
+              <div
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-xs font-semibold
+                ${
+                  weatherLoading
+                    ? "bg-blue-50 border-blue-200 text-blue-700"
+                    : "bg-green-50 border-green-200 text-green-700"
+                }`}
+                style={{ animation: "fadeIn .3s ease" }}
+              >
+                {weatherLoading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin flex-shrink-0" />{" "}
+                    Fetching live weather for your location…
+                  </>
+                ) : (
+                  <>
+                    <FaCheckCircle className="text-green-500 flex-shrink-0" />{" "}
+                    Temperature & humidity auto-filled from live weather
+                    {weatherCity ? ` in ${weatherCity}` : ""}. Verify before
+                    submitting.
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Soil Parameters */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="flex items-center gap-2.5 px-6 py-4 border-b border-gray-50 bg-gradient-to-r from-amber-50 to-yellow-50">
+                <FaFlask className="text-amber-500" />
+                <h3 className="font-extrabold text-[#073319] text-sm">
+                  Soil Nutrients
+                </h3>
+                <span className="text-[10px] text-gray-400 font-medium ml-auto">
+                  kg/ha units
+                </span>
+              </div>
+              <div className="px-6 py-5 space-y-4">
+                {FIELDS.slice(0, 3).map((f) => (
+                  <InputField
+                    key={f.key}
+                    field={f}
+                    value={form[f.key]}
+                    onChange={setField}
+                    error={fieldErrors[f.key]}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Environmental Parameters */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="flex items-center gap-2.5 px-6 py-4 border-b border-gray-50 bg-gradient-to-r from-sky-50 to-cyan-50">
+                <MdAir className="text-sky-500 text-base" />
+                <h3 className="font-extrabold text-[#073319] text-sm">
+                  Environmental Conditions
+                </h3>
+                {profileLoaded && (
+                  <span className="ml-auto text-[10px] font-bold text-green-600 flex items-center gap-1">
+                    <FaLocationArrow className="text-[8px]" /> Auto-filled
+                  </span>
+                )}
+              </div>
+              <div className="px-6 py-5 space-y-4">
+                {FIELDS.slice(3).map((f) => (
+                  <InputField
+                    key={f.key}
+                    field={f}
+                    value={form[f.key]}
+                    onChange={setField}
+                    error={fieldErrors[f.key]}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* API error */}
+            {apiError && (
+              <div
+                className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-600 text-xs font-semibold px-4 py-3 rounded-xl"
+                style={{ animation: "shake .4s ease" }}
+              >
+                ⚠ {apiError}
+              </div>
+            )}
+
+            {/* Submit */}
+            <div className="flex gap-3">
+              {results && (
+                <button
+                  onClick={handleReset}
+                  className="flex-1 border-2 border-gray-200 text-gray-600 font-bold py-3.5 rounded-xl text-sm hover:border-gray-300 hover:bg-gray-50 transition-all"
+                >
+                  Reset
+                </button>
+              )}
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className={`${results ? "flex-[2]" : "w-full"} flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-3.5 rounded-xl text-sm transition-all shadow-lg
+                  ${loading ? "opacity-70 cursor-not-allowed" : "hover:opacity-90 hover:-translate-y-0.5 hover:shadow-xl"}`}
+                style={
+                  !loading
+                    ? { boxShadow: "0 6px 24px rgba(22,163,74,.35)" }
+                    : {}
+                }
+              >
+                {loading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{" "}
+                    Analysing Soil Data…
+                  </>
+                ) : (
+                  <>
+                    <MdAgriculture className="text-base" /> Get Crop
+                    Recommendations
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Hint */}
+            <p className="text-xs text-gray-400 text-center flex items-center gap-1.5 justify-center">
+              <FaInfoCircle className="text-[10px]" />
+              Results are saved automatically to your history
+            </p>
+          </div>
+
+          {/* Result */}
+          <div className="lg:col-span-3" ref={resultsRef}>
+            {/* Idle state */}
+            {!results && !loading && (
+              <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-10 text-center h-full flex flex-col items-center justify-center min-h-[400px]">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-emerald-100 border border-green-200 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-5">
+                  🌱
+                </div>
+                <h3 className="font-extrabold text-[#073319] text-lg mb-2">
+                  Ready to Analyse
+                </h3>
+                <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
+                  Fill in your soil nutrient values and environmental
+                  conditions, then click{" "}
+                  <strong>Get Crop Recommendations</strong>.
+                </p>
+                <div className="grid grid-cols-2 gap-3 mt-8 w-full max-w-xs">
+                  {["Rice 🌾", "Banana 🍌", "Maize 🌽", "Coffee ☕"].map(
+                    (c) => (
+                      <div
+                        key={c}
+                        className="bg-green-50 border border-green-100 rounded-xl px-3 py-2 text-xs font-semibold text-green-700 text-center"
+                      >
+                        {c}
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Loading skeleton */}
+            {loading && (
+              <div className="space-y-4">
+                <div className="bg-white rounded-2xl border border-gray-100 p-5 animate-pulse flex gap-4">
+                  <div className="w-28 h-28 rounded-xl bg-gray-200 flex-shrink-0" />
+                  <div className="flex-1 space-y-2.5 py-1">
+                    <div className="h-4 bg-gray-200 rounded w-1/2" />
+                    <div className="h-3 bg-gray-100 rounded w-1/3" />
+                    <div className="h-2.5 bg-gray-100 rounded-full" />
+                    <div className="h-2.5 bg-gray-100 rounded-full w-3/4" />
+                  </div>
+                </div>
+                {[...Array(2)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-white rounded-2xl border border-gray-100 p-4 animate-pulse"
+                  >
+                    <div className="flex gap-3">
+                      <div className="w-16 h-16 rounded-xl bg-gray-200 flex-shrink-0" />
+                      <div className="flex-1 space-y-2 py-1">
+                        <div className="h-3 bg-gray-200 rounded w-1/3" />
+                        <div className="h-2 bg-gray-100 rounded-full" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Results */}
+            {results && !loading && (
+              <div style={{ animation: "fadeSlide .5s ease" }}>
+                {/* Top banner */}
+                <div
+                  className={`bg-gradient-to-r ${topInfo?.color || "from-green-500 to-emerald-600"} text-white rounded-2xl p-5 mb-5 shadow-lg overflow-hidden relative`}
+                  style={{ boxShadow: `0 8px 32px rgba(22,163,74,.25)` }}
+                >
+                  <div className="absolute -right-8 -top-8 text-9xl opacity-15 select-none">
+                    {topInfo?.emoji}
+                  </div>
+                  <div className="relative">
+                    <p className="text-xs font-bold text-white/70 uppercase tracking-widest mb-1">
+                      Best Match
+                    </p>
+                    <h2 className="text-2xl font-extrabold mb-1">
+                      {topResult?.crop}
+                    </h2>
+                    <p className="text-white/80 text-sm mb-3">
+                      {topInfo?.description?.slice(0, 90)}…
+                    </p>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className="bg-white/20 backdrop-blur-sm border border-white/25 text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                        🎯 {topResult?.confidence}% Confidence
+                      </span>
+                      {recordId && (
+                        <span className="text-white/50 text-[10px] font-mono">
+                          ID: {recordId.slice(-8)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Summary input recap */}
+                <div className="bg-white border border-gray-100 rounded-2xl px-5 py-4 mb-5 shadow-sm">
+                  <p className="text-xs font-extrabold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <FaFlask className="text-green-500" /> Input Summary
+                  </p>
+                  <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+                    {FIELDS.map((f) => (
+                      <div
+                        key={f.key}
+                        className="text-center bg-gray-50 rounded-xl px-2 py-2"
+                      >
+                        <p className="text-[9px] font-bold text-gray-400 uppercase">
+                          {f.key}
+                        </p>
+                        <p className="text-xs font-extrabold text-[#073319] mt-0.5">
+                          {form[f.key]}
+                        </p>
+                        <p className="text-[9px] text-gray-400">{f.unit}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* All crop cards */}
+                <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {results.map((rec, i) => (
+                    <CropCard
+                      key={rec.crop}
+                      rec={rec}
+                      rank={i + 1}
+                      isTop={i === 0}
+                    />
+                  ))}
+                </div>
+
+                {/* Footer actions */}
+                <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                  <button
+                    onClick={handleReset}
+                    className="flex-1 border-2 border-green-200 text-green-700 font-bold py-3 rounded-xl text-sm hover:bg-green-50 transition-all"
+                  >
+                    Try Different Values
+                  </button>
+                  <Link
+                    to="/dashboard"
+                    className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-3 rounded-xl text-sm hover:opacity-90 transition-all shadow"
+                    style={{ boxShadow: "0 4px 16px rgba(22,163,74,.3)" }}
+                  >
+                    View History in Dashboard <HiArrowRight />
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes fadeIn    { from{opacity:0}                             to{opacity:1}              }
+        @keyframes fadeSlide { from{opacity:0;transform:translateY(12px)}  to{opacity:1;transform:translateY(0)} }
+        @keyframes shake     { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 40%{transform:translateX(5px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
+      `}</style>
+    </div>
+  );
+}
