@@ -154,3 +154,36 @@ const socialLinks = [
     color: "hover:text-blue-700",
   },
 ];
+
+/* FAQ accordion item */
+function FaqItem({ q, a, index }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Reveal delay={index * 60}>
+      <div
+        className={`border rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer
+          ${open ? "border-green-300 shadow-sm bg-green-50" : "border-gray-100 bg-white hover:border-green-200"}`}
+        onClick={() => setOpen((p) => !p)}
+      >
+        <div className="flex items-center justify-between px-5 py-4 gap-4">
+          <span className="text-sm font-semibold text-[#073319]">{q}</span>
+          <span
+            className={`text-green-600 text-lg flex-shrink-0 transition-transform duration-300 ${open ? "rotate-45" : ""}`}
+          >
+            +
+          </span>
+        </div>
+        <div
+          style={{
+            maxHeight: open ? "200px" : "0",
+            opacity: open ? 1 : 0,
+            transition: "max-height 0.35s ease, opacity 0.3s ease",
+          }}
+          className="overflow-hidden"
+        >
+          <p className="px-5 pb-4 text-sm text-gray-600 leading-relaxed">{a}</p>
+        </div>
+      </div>
+    </Reveal>
+  );
+}
