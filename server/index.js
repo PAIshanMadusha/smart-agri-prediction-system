@@ -23,7 +23,13 @@ const PORT = process.env.PORT || 5000;
 // Create an Express application
 const app = express();
 
-app.use(cors()); // Enable CORS for all routes
+// Enable CORS for all routes and allow credentials (cookies) to be sent from the client
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use(express.json()); // Middleware to parse JSON request bodies
 app.use(cookieParser()); // Middleware to parse cookies
 
