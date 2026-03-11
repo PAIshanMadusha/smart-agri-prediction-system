@@ -580,3 +580,213 @@ export function FertilizerHistory({ limit }) {
     </Section>
   );
 }
+
+/* Disease history */
+function DiseaseHistoryItem({ record }) {
+  const [open, setOpen] = useState(false);
+  const conf = parseFloat(record.confidenceScore);
+
+  const severity = record.predictedDisease?.toLowerCase().includes("healthy")
+    ? "None"
+    : conf >= 90
+      ? "High"
+      : conf >= 60
+        ? "Medium"
+        : "Low";
+
+  const sevClass = SEV_COLOR[severity] || SEV_COLOR.Medium;
+
+  return (
+    <div className="border-b border-gray-50 last:border-0">
+      <div
+        className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50/60 transition-colors cursor-pointer"
+        onClick={() => setOpen((p) => !p)}
+      >
+        {/* Leaf image thumbnail */}
+        <div className="w-10 h-10 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden flex-shrink-0">
+          {record.imageUrl ? (
+            <img
+              src={record.imageUrl}
+              alt="leaf"
+              className="w-full h-full object-cover"
+              onError={(e) => (e.target.style.display = "none")}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-xl">
+              🍃
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+            <p className="text-sm font-extrabold text-[#073319] truncate">
+              {formatDisease(record.predictedDisease)}
+            </p>
+            {record.isLowConfidence && (
+              <span className="text-[9px] font-bold bg-amber-100 text-amber-600 border border-amber-200 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                Low confidence
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span
+              className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${sevClass} flex-shrink-0`}
+            >
+              {severity}
+            </span>
+            <span className="text-[11px] text-gray-400">
+              {conf.toFixed(1)}% confidence
+            </span>
+          </div>
+        </div>
+
+        <div className="text-right flex-shrink-0">
+          <p className="text-[11px] text-gray-400 flex items-center gap-1 justify-end">
+            <FaCalendarAlt className="text-[9px]" /> {timeAgo(record.createdAt)}
+          </p>
+          <span className="text-gray-400 mt-1 block">
+            {open ? (
+              <FaChevronUp className="text-[10px] ml-auto" />
+            ) : (
+              <FaChevronDown className="text-[10px] ml-auto" />
+            )}
+          </span>
+        </div>
+      </div>
+
+      {open && (
+        <div
+          className="px-6 pb-4 bg-gray-50/40 border-t border-gray-100"
+          style={{ animation: "expandIn .2s ease" }}
+        >
+          <div className="flex flex-col sm:flex-row gap-4 mt-3">
+            {/* Image */}
+            {record.imageUrl && (
+              <div className="sm:w-36 flex-shrink-0">
+                <img
+                  src={record.imageUrl}
+                  alt="leaf"
+                  className="w-full h-28 sm:h-36 object-cover rounded-xl border border-gray-200"
+                />
+              </div>
+            )}
+            {/* Top predictions */}
+            <div className="flex-1">
+              <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-2">
+                Top Predictions
+              </p>
+              <div className="space-y-2">
+                {record.topPredictions?.slice(0, 5).map((p, i) => {
+                  const pConf = parseFloat(p.confidence);
+                  return (
+                    <div key={p._id}>
+                      <div className="flex justify-between mb-0.5">
+                        <span className="text-xs font-bold text-[#073319] truncate max-w-[200px]">
+                          {i === 0 && "🥇 "}
+                          {formatDisease(p.disease)}
+                        </span>
+                        <span className="text-[10px] text-gray-500 ml-2 flex-shrink-0">
+                          {pConf.toFixed(1)}%
+                        </span>
+                      </div>
+                      <MiniBar
+                        value={pConf}
+                        color={
+                          pConf >= 80
+                            ? "bg-green-500"
+                            : pConf >= 40
+                              ? "bg-yellow-500"
+                              : "bg-gray-300"
+                        }
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function DiseaseHistory({ limit }) {
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetch = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const d = await api.diseaseHistory();
+      setRecords(d.records || []);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+  const shown = limit ? records.slice(0, limit) : records;
+
+  return (
+    <Section
+      icon="🔬"
+      title="Disease Detection History"
+      count={records.length}
+      color="bg-gradient-to-r from-red-50 to-rose-50"
+      linkTo="/ai-services/disease"
+      linkLabel="New Detection"
+      loading={loading}
+      onRefresh={fetch}
+    >
+      {loading ? (
+        <div className="p-6 space-y-3">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex gap-3 animate-pulse">
+              <div className="w-10 h-10 rounded-xl bg-gray-200 flex-shrink-0" />
+              <div className="flex-1 space-y-1.5 py-0.5">
+                <div className="h-3 bg-gray-200 rounded w-1/2" />
+                <div className="h-2.5 bg-gray-100 rounded w-1/3" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : error ? (
+        <div className="px-6 py-4 text-xs text-red-500 font-semibold">
+          ⚠ {error}
+        </div>
+      ) : shown.length === 0 ? (
+        <EmptyState
+          emoji="🔬"
+          message="No disease detections yet."
+          linkTo="/ai-services/disease"
+          linkLabel="Scan First Leaf"
+        />
+      ) : (
+        <>
+          {shown.map((r) => (
+            <DiseaseHistoryItem key={r._id} record={r} />
+          ))}
+          {limit && records.length > limit && (
+            <div className="px-6 py-3 border-t border-gray-50 text-center">
+              <Link
+                to="/history"
+                className="text-xs font-bold text-green-600 hover:text-green-800 flex items-center justify-center gap-1"
+              >
+                View all {records.length} records{" "}
+                <HiArrowRight className="text-[10px]" />
+              </Link>
+            </div>
+          )}
+        </>
+      )}
+    </Section>
+  );
+}
