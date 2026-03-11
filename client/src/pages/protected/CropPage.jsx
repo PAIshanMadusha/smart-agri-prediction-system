@@ -510,3 +510,205 @@ function ConfidenceBar({ value, color = "bg-green-500" }) {
     </div>
   );
 }
+
+/* Crop card */
+function CropCard({ rec, rank, isTop }) {
+  const [expanded, setExpanded] = useState(false);
+  const info = CROP_DATA[rec.crop] || null;
+  const confidence = rec.confidence ?? 0;
+
+  const confidenceColor =
+    confidence >= 70
+      ? "bg-green-500"
+      : confidence >= 40
+        ? "bg-yellow-500"
+        : confidence >= 10
+          ? "bg-orange-500"
+          : "bg-gray-300";
+
+  const textColor =
+    confidence >= 70
+      ? "text-green-600"
+      : confidence >= 40
+        ? "text-yellow-600"
+        : confidence >= 10
+          ? "text-orange-500"
+          : "text-gray-400";
+
+  return (
+    <div
+      className={`bg-white rounded-2xl border overflow-hidden transition-all duration-300
+        ${isTop ? "border-green-300 shadow-xl ring-2 ring-green-200" : "border-gray-100 shadow-sm hover:shadow-md"}
+        ${confidence === 0 ? "opacity-60" : ""}`}
+      style={isTop ? { boxShadow: "0 8px 32px rgba(22,163,74,.18)" } : {}}
+    >
+      {/* Rank badge + image */}
+      <div className="relative overflow-hidden h-36">
+        {info?.imageUrl ? (
+          <img
+            src={info.imageUrl}
+            alt={rec.crop}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.parentElement.classList.add("bg-gradient-to-br");
+              e.target.style.display = "none";
+            }}
+          />
+        ) : (
+          <div
+            className={`w-full h-full bg-gradient-to-br ${info?.color || "from-gray-300 to-gray-400"} flex items-center justify-center text-5xl`}
+          >
+            {info?.emoji || "🌱"}
+          </div>
+        )}
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+
+        {/* Rank badge */}
+        <div className="absolute top-3 left-3">
+          {rank === 1 ? (
+            <span className="flex items-center gap-1.5 bg-amber-400 text-white text-xs font-extrabold px-3 py-1 rounded-full shadow">
+              <FaTrophy className="text-[10px]" /> Top Pick
+            </span>
+          ) : (
+            <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full border border-white/30">
+              #{rank}
+            </span>
+          )}
+        </div>
+
+        {/* Category tag */}
+        {info && (
+          <div className="absolute top-3 right-3">
+            <span
+              className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${info.tagColor} bg-white/90 backdrop-blur-sm`}
+            >
+              {info.category}
+            </span>
+          </div>
+        )}
+
+        {/* Crop name */}
+        <div className="absolute bottom-3 left-3 right-3">
+          <h3 className="text-white font-extrabold text-base leading-tight drop-shadow">
+            {rec.crop}
+          </h3>
+          {info && (
+            <p className="text-white/70 text-xs">
+              {info.emoji} {info.season}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Confidence */}
+      <div className="px-4 pt-3.5 pb-2">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-xs font-bold text-gray-500">Confidence</span>
+          <span className={`text-sm font-extrabold ${textColor}`}>
+            {confidence}%
+          </span>
+        </div>
+        <ConfidenceBar value={confidence} color={confidenceColor} />
+      </div>
+
+      {/* Quick stats */}
+      {info && (
+        <div className="px-4 pb-3 grid grid-cols-3 gap-2">
+          {[
+            { label: "Temp", val: info.idealTemp },
+            { label: "pH", val: info.idealPh },
+            { label: "Water", val: info.waterNeeds },
+          ].map(({ label, val }) => (
+            <div
+              key={label}
+              className="bg-gray-50 rounded-xl px-2 py-1.5 text-center"
+            >
+              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">
+                {label}
+              </p>
+              <p className="text-[11px] font-bold text-[#073319] mt-0.5 leading-tight">
+                {val}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Expandable details */}
+      {info && confidence > 0 && (
+        <>
+          <button
+            onClick={() => setExpanded((p) => !p)}
+            className="w-full flex items-center justify-between px-4 py-2.5 border-t border-gray-50 text-xs font-bold text-gray-500 hover:text-green-700 hover:bg-green-50 transition-colors"
+          >
+            More Details
+            {expanded ? (
+              <FaChevronUp className="text-[10px]" />
+            ) : (
+              <FaChevronDown className="text-[10px]" />
+            )}
+          </button>
+          <div
+            className={`overflow-hidden transition-all duration-300 ${expanded ? "max-h-72" : "max-h-0"}`}
+          >
+            <div className="px-4 pb-4 space-y-3">
+              <p className="text-xs text-gray-600 leading-relaxed">
+                {info.description}
+              </p>
+              <div className="bg-green-50 border border-green-100 rounded-xl px-3 py-2">
+                <p className="text-[10px] font-extrabold text-green-700 uppercase tracking-wider mb-1">
+                  💡 Farming Tip
+                </p>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  {info.tips}
+                </p>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {[{ label: "Duration", val: info.duration }].map(
+                  ({ label, val }) => (
+                    <span
+                      key={label}
+                      className="text-[10px] font-semibold bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full"
+                    >
+                      ⏱ {label}: {val}
+                    </span>
+                  ),
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* Input field */
+function InputField({ field, value, onChange, error }) {
+  return (
+    <div>
+      <label className="block text-xs font-bold text-gray-600 mb-1.5 flex items-center gap-1.5">
+        <span className="text-green-500">{field.icon}</span>
+        {field.label}
+        <span className="text-gray-400 font-normal">({field.unit})</span>
+      </label>
+      <input
+        type="number"
+        min={field.min}
+        max={field.max}
+        step={field.step}
+        value={value}
+        onChange={(e) => onChange(field.key, e.target.value)}
+        placeholder={`e.g. ${field.min + Math.round((field.max - field.min) / 2)}`}
+        className={`w-full px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 hover:border-green-300 transition-all
+          ${error ? "border-red-300 bg-red-50" : "border-gray-200"}`}
+      />
+      <p className="text-[10px] text-gray-400 mt-1">{field.hint}</p>
+      {error && (
+        <p className="text-xs text-red-500 font-semibold mt-0.5">{error}</p>
+      )}
+    </div>
+  );
+}
