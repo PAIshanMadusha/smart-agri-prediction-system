@@ -19,7 +19,7 @@ import { HiSparkles, HiArrowRight } from "react-icons/hi2";
 import { MdBugReport, MdHealthAndSafety, MdWarning } from "react-icons/md";
 
 /* API */
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
 const api = {
   // POST /api/disease/predict

@@ -20,7 +20,7 @@ import { HiSparkles, HiArrowRight } from "react-icons/hi2";
 import { WiHumidity, WiRaindrop } from "react-icons/wi";
 
 /* API */
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
 const cookieFetch = (path, options = {}) =>
   fetch(`${BASE_URL}${path}`, {
