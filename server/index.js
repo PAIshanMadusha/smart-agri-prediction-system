@@ -26,7 +26,10 @@ const app = express();
 // Enable CORS for all routes and allow credentials (cookies) to be sent from the client
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://smart-agri-prediction-system.vercel.app",
+    ],
     credentials: true,
   }),
 );
