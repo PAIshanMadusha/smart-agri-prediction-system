@@ -29,9 +29,9 @@ const cookieFetch = (path) =>
   });
 
 const api = {
-  cropHistory: () => cookieFetch("api/crop/history"),
-  fertilizerHistory: () => cookieFetch("api/fertilizer/history"),
-  diseaseHistory: () => cookieFetch("api/disease/history"),
+  cropHistory: () => cookieFetch("/api/crop/history"),
+  fertilizerHistory: () => cookieFetch("/api/fertilizer/history"),
+  diseaseHistory: () => cookieFetch("/api/disease/history"),
 };
 
 /* Utils */

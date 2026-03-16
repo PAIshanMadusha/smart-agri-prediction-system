@@ -26,7 +26,7 @@ const api = {
   predict: (file) => {
     const fd = new FormData();
     fd.append("file", file);
-    return fetch(`${BASE_URL}api/disease/predict`, {
+    return fetch(`${BASE_URL}/api/disease/predict`, {
       method: "POST",
       credentials: "include",
       body: fd,

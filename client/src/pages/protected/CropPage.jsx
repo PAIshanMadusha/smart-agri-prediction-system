@@ -36,16 +36,16 @@ const cookieFetch = (path, options = {}) =>
 const api = {
   // POST /api/crop/predict → { success, recommendations[], recordId }
   predict: (body) =>
-    cookieFetch("api/crop/predict", {
+    cookieFetch("/api/crop/predict", {
       method: "POST",
       body: JSON.stringify(body),
     }),
 
   // GET /api/user/profile → { success, user }  (prefill weather lat/lon)
-  getProfile: () => cookieFetch("api/user/profile"),
+  getProfile: () => cookieFetch("/api/user/profile"),
 
   // GET /api/weather?lat=&lon= → { success, weather }
-  getWeather: (lat, lon) => cookieFetch(`api/weather?lat=${lat}&lon=${lon}`),
+  getWeather: (lat, lon) => cookieFetch(`/api/weather?lat=${lat}&lon=${lon}`),
 };
 
 /* Crop dataset */

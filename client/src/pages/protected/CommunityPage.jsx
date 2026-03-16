@@ -39,21 +39,21 @@ async function apiFetch(path, options = {}) {
 
 const api = {
   // GET /api/post  → { success, posts[] }
-  getPosts: () => apiFetch("api/post"),
+  getPosts: () => apiFetch("/api/post"),
 
   // POST /api/post  → { success, message, post }
   createPost: (body) =>
-    apiFetch("api/post", { method: "POST", body: JSON.stringify(body) }),
+    apiFetch("/api/post", { method: "POST", body: JSON.stringify(body) }),
 
   // DELETE /api/post/:id  → { success, message }
-  deletePost: (id) => apiFetch(`api/post/${id}`, { method: "DELETE" }),
+  deletePost: (id) => apiFetch(`/api/post/${id}`, { method: "DELETE" }),
 
   // PUT /api/post/:id/like  → { success, likes: number }
-  toggleLike: (id) => apiFetch(`api/post/${id}/like`, { method: "PUT" }),
+  toggleLike: (id) => apiFetch(`/api/post/${id}/like`, { method: "PUT" }),
 
   // POST /api/post/:id/comment  → { success, message, text }
   addComment: (id, text) =>
-    apiFetch(`api/post/${id}/comment`, {
+    apiFetch(`/api/post/${id}/comment`, {
       method: "POST",
       body: JSON.stringify({ text }),
     }),
