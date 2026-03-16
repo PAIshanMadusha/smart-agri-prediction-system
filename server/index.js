@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import path from "path";
 import { connectDB } from "./db/connectDB.js";
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
@@ -20,9 +19,6 @@ dotenv.config({ path: "../.env" });
 
 // Get the port from environment variables or use a default value
 const PORT = process.env.PORT || 5000;
-
-// Get the directory name of the current module
-const __dirname = path.resolve();
 
 // Create an Express application
 const app = express();
