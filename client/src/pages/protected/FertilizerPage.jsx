@@ -34,12 +34,12 @@ const cookieFetch = (path, options = {}) =>
 
 const api = {
   predict: (body) =>
-    cookieFetch("api/fertilizer/predict", {
+    cookieFetch("/api/fertilizer/predict", {
       method: "POST",
       body: JSON.stringify(body),
     }),
-  getProfile: () => cookieFetch("api/user/profile"),
-  getWeather: (lat, lon) => cookieFetch(`api/weather?lat=${lat}&lon=${lon}`),
+  getProfile: () => cookieFetch("/api/user/profile"),
+  getWeather: (lat, lon) => cookieFetch(`/api/weather?lat=${lat}&lon=${lon}`),
 };
 
 /* Dataset */

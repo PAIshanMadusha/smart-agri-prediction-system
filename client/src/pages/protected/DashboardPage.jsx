@@ -38,11 +38,11 @@ const cookieFetch = (path) =>
   });
 
 const api = {
-  getProfile: () => cookieFetch("api/user/profile"),
-  getWeather: (lat, lon) => cookieFetch(`api/weather?lat=${lat}&lon=${lon}`),
-  cropHistory: () => cookieFetch("api/crop/history"),
-  fertilizerHistory: () => cookieFetch("api/fertilizer/history"),
-  diseaseHistory: () => cookieFetch("api/disease/history"),
+  getProfile: () => cookieFetch("/api/user/profile"),
+  getWeather: (lat, lon) => cookieFetch(`/api/weather?lat=${lat}&lon=${lon}`),
+  cropHistory: () => cookieFetch("/api/crop/history"),
+  fertilizerHistory: () => cookieFetch("/api/fertilizer/history"),
+  diseaseHistory: () => cookieFetch("/api/disease/history"),
 };
 
 /* Utils */

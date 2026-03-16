@@ -46,18 +46,18 @@ const cookieFetch = (path, options = {}) =>
 
 const api = {
   // GET  /api/user/profile → { success, user }
-  getProfile: () => cookieFetch("api/user/profile"),
+  getProfile: () => cookieFetch("/api/user/profile"),
 
   // PUT  /api/user/profile → { success, message, user }
   // accepts: { name, phone, location, farmSize, preferredCrops }
   updateProfile: (body) =>
-    cookieFetch("api/user/profile", {
+    cookieFetch("/api/user/profile", {
       method: "PUT",
       body: JSON.stringify(body),
     }),
 
   // GET  /api/weather?lat=&lon= → { success, weather: {...} }
-  getWeather: (lat, lon) => cookieFetch(`api/weather?lat=${lat}&lon=${lon}`),
+  getWeather: (lat, lon) => cookieFetch(`/api/weather?lat=${lat}&lon=${lon}`),
 };
 
 /* Helpers */
