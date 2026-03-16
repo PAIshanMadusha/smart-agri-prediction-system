@@ -20,7 +20,7 @@ import { MdClose } from "react-icons/md";
 import { useAuth } from "../../context/useAuth";
 
 /* API */
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 async function apiFetch(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -39,21 +39,21 @@ async function apiFetch(path, options = {}) {
 
 const api = {
   // GET /api/post  → { success, posts[] }
-  getPosts: () => apiFetch("/post"),
+  getPosts: () => apiFetch("api/post"),
 
   // POST /api/post  → { success, message, post }
   createPost: (body) =>
-    apiFetch("/post", { method: "POST", body: JSON.stringify(body) }),
+    apiFetch("api/post", { method: "POST", body: JSON.stringify(body) }),
 
   // DELETE /api/post/:id  → { success, message }
-  deletePost: (id) => apiFetch(`/post/${id}`, { method: "DELETE" }),
+  deletePost: (id) => apiFetch(`api/post/${id}`, { method: "DELETE" }),
 
   // PUT /api/post/:id/like  → { success, likes: number }
-  toggleLike: (id) => apiFetch(`/post/${id}/like`, { method: "PUT" }),
+  toggleLike: (id) => apiFetch(`api/post/${id}/like`, { method: "PUT" }),
 
   // POST /api/post/:id/comment  → { success, message, text }
   addComment: (id, text) =>
-    apiFetch(`/post/${id}/comment`, {
+    apiFetch(`api/post/${id}/comment`, {
       method: "POST",
       body: JSON.stringify({ text }),
     }),
