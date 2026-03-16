@@ -19,7 +19,7 @@ import { HiSparkles, HiArrowRight } from "react-icons/hi2";
 import { WiHumidity } from "react-icons/wi";
 
 /* API */
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const cookieFetch = (path, options = {}) =>
   fetch(`${BASE_URL}${path}`, {
@@ -34,12 +34,12 @@ const cookieFetch = (path, options = {}) =>
 
 const api = {
   predict: (body) =>
-    cookieFetch("/fertilizer/predict", {
+    cookieFetch("api/fertilizer/predict", {
       method: "POST",
       body: JSON.stringify(body),
     }),
-  getProfile: () => cookieFetch("/user/profile"),
-  getWeather: (lat, lon) => cookieFetch(`/weather?lat=${lat}&lon=${lon}`),
+  getProfile: () => cookieFetch("api/user/profile"),
+  getWeather: (lat, lon) => cookieFetch(`api/weather?lat=${lat}&lon=${lon}`),
 };
 
 /* Dataset */

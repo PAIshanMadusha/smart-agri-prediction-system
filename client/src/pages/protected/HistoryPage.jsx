@@ -19,7 +19,7 @@ import { MdAgriculture, MdBugReport, MdRefresh } from "react-icons/md";
 import { HiArrowRight } from "react-icons/hi2";
 
 /* API */
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const cookieFetch = (path) =>
   fetch(`${BASE_URL}${path}`, { credentials: "include" }).then(async (r) => {
@@ -29,9 +29,9 @@ const cookieFetch = (path) =>
   });
 
 const api = {
-  cropHistory: () => cookieFetch("/crop/history"),
-  fertilizerHistory: () => cookieFetch("/fertilizer/history"),
-  diseaseHistory: () => cookieFetch("/disease/history"),
+  cropHistory: () => cookieFetch("api/crop/history"),
+  fertilizerHistory: () => cookieFetch("api/fertilizer/history"),
+  diseaseHistory: () => cookieFetch("api/disease/history"),
 };
 
 /* Utils */

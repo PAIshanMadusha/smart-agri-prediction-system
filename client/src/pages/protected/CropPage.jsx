@@ -20,7 +20,7 @@ import { HiSparkles, HiArrowRight } from "react-icons/hi2";
 import { WiHumidity, WiRaindrop } from "react-icons/wi";
 
 /* API */
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const cookieFetch = (path, options = {}) =>
   fetch(`${BASE_URL}${path}`, {
@@ -36,16 +36,16 @@ const cookieFetch = (path, options = {}) =>
 const api = {
   // POST /api/crop/predict → { success, recommendations[], recordId }
   predict: (body) =>
-    cookieFetch("/crop/predict", {
+    cookieFetch("api/crop/predict", {
       method: "POST",
       body: JSON.stringify(body),
     }),
 
   // GET /api/user/profile → { success, user }  (prefill weather lat/lon)
-  getProfile: () => cookieFetch("/user/profile"),
+  getProfile: () => cookieFetch("api/user/profile"),
 
   // GET /api/weather?lat=&lon= → { success, weather }
-  getWeather: (lat, lon) => cookieFetch(`/weather?lat=${lat}&lon=${lon}`),
+  getWeather: (lat, lon) => cookieFetch(`api/weather?lat=${lat}&lon=${lon}`),
 };
 
 /* Crop dataset */
