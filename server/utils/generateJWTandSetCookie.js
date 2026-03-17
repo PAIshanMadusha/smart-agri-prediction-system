@@ -16,7 +16,7 @@ export const generateJWTandSetCookie = (res, userId) => {
   res.cookie("token", token, {
     httpOnly: true, // Accessible only by web server
     secure: process.env.NODE_ENV === "production", // Secure in production
-    sameSite: "None", // CSRF protection for cross-site requests
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // CSRF protection for cross-site requests
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
